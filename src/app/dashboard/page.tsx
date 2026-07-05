@@ -1,17 +1,17 @@
+import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function DashboardPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Topbar />
-      <div className="flex flex-1">
-        <aside className="w-64 shrink-0 border-r border-border p-4">
-          <h2>Sidebar</h2>
-        </aside>
+    <SidebarProvider className="min-h-screen">
+      <AppSidebar />
+      <SidebarInset>
+        <Topbar />
         <main className="flex-1 p-6">
           <h2>Main</h2>
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
