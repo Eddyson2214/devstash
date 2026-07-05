@@ -2,19 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Code,
-  File,
-  Folder,
-  Image as ImageIcon,
-  Layers,
-  Link as LinkIcon,
-  Sparkles,
-  Star,
-  StickyNote,
-  Terminal,
-  type LucideIcon,
-} from "lucide-react";
+import { Code, Folder, Layers, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -31,23 +19,16 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { collections, currentUser, itemTypes, items } from "@/lib/mock-data";
-
-const TYPE_ICONS: Record<string, LucideIcon> = {
-  Code,
-  Sparkles,
-  Terminal,
-  StickyNote,
-  File,
-  Image: ImageIcon,
-  Link: LinkIcon,
-};
+import {
+  collections,
+  currentUser,
+  getRecentCollections,
+  itemTypes,
+  items,
+} from "@/lib/mock-data";
+import { TYPE_ICONS, typeHref } from "@/lib/type-icons";
 
 const RECENT_COLLECTIONS_LIMIT = 5;
-
-function typeHref(name: string) {
-  return `/items/${name.toLowerCase()}s`;
-}
 
 function userInitials(name: string) {
   return name
@@ -61,9 +42,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   const favoriteCollections = collections.filter((c) => c.isFavorite);
-  const recentCollections = [...collections]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, RECENT_COLLECTIONS_LIMIT);
+  const recentCollections = getRecentCollections(RECENT_COLLECTIONS_LIMIT);
 
   return (
     <Sidebar collapsible="icon">
