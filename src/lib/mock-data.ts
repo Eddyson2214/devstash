@@ -19,6 +19,7 @@ export interface Collection {
   description: string;
   isFavorite: boolean;
   itemTypeIds: string[];
+  createdAt: string;
 }
 
 export interface Item {
@@ -57,6 +58,7 @@ export const collections: Collection[] = [
     description: "Common React patterns and hooks",
     isFavorite: true,
     itemTypeIds: ["type-snippet", "type-note", "type-link"],
+    createdAt: "2026-01-10",
   },
   {
     id: "collection-python-snippets",
@@ -64,6 +66,7 @@ export const collections: Collection[] = [
     description: "Useful Python code snippets",
     isFavorite: false,
     itemTypeIds: ["type-snippet", "type-note"],
+    createdAt: "2025-11-02",
   },
   {
     id: "collection-context-files",
@@ -71,6 +74,7 @@ export const collections: Collection[] = [
     description: "AI context files for projects",
     isFavorite: true,
     itemTypeIds: ["type-file", "type-note"],
+    createdAt: "2026-02-20",
   },
   {
     id: "collection-interview-prep",
@@ -78,6 +82,7 @@ export const collections: Collection[] = [
     description: "Technical interview preparation",
     isFavorite: false,
     itemTypeIds: ["type-note", "type-snippet", "type-link", "type-prompt"],
+    createdAt: "2025-09-18",
   },
   {
     id: "collection-git-commands",
@@ -85,6 +90,7 @@ export const collections: Collection[] = [
     description: "Frequently used git commands",
     isFavorite: true,
     itemTypeIds: ["type-command", "type-note"],
+    createdAt: "2026-02-28",
   },
   {
     id: "collection-ai-prompts",
@@ -92,6 +98,7 @@ export const collections: Collection[] = [
     description: "Curated AI prompts for coding",
     isFavorite: false,
     itemTypeIds: ["type-prompt", "type-snippet", "type-note"],
+    createdAt: "2026-03-05",
   },
 ];
 

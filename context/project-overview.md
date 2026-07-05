@@ -445,6 +445,10 @@ Freemium model:
 - Toast notifications for actions
 - Loading skeletons while fetching
 
+### Screenshots
+Refers to the screenshots below as a base for the dashboard UI. It does not to be exact. Use it as reference
+- @context/screenshots/dashboard-ui-main.png
+- @context/screenshots/dashboard-ui-drawer.png
 ---
 
 ## ❓ Open Questions / Decisions Needed
