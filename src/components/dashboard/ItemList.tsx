@@ -1,11 +1,11 @@
 import { Pin, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { itemTypes, type Item } from "@/lib/mock-data";
+import type { DashboardItem } from "@/lib/db/items";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
+function formatDate(date: Date) {
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
@@ -13,7 +13,7 @@ function formatDate(dateString: string) {
 
 interface ItemListProps {
   title: string;
-  items: Item[];
+  items: DashboardItem[];
   emptyMessage: string;
 }
 
@@ -23,20 +23,19 @@ export function ItemList({ title, items: listItems, emptyMessage }: ItemListProp
       <h3 className="mb-3 text-lg font-semibold">{title}</h3>
       <div className="flex flex-col gap-3">
         {listItems.map((item) => {
-          const itemType = itemTypes.find((type) => type.id === item.itemTypeId);
-          const Icon = itemType ? TYPE_ICONS[itemType.icon] : null;
+          const Icon = TYPE_ICONS[item.itemType.icon];
 
           return (
             <div
               key={item.id}
               className="flex items-start gap-3 rounded-lg border-l-4 bg-card p-4 ring-1 ring-foreground/10"
-              style={{ borderLeftColor: itemType?.color }}
+              style={{ borderLeftColor: item.itemType.color }}
             >
               <div
                 className="flex size-9 shrink-0 items-center justify-center rounded-md"
-                style={{ backgroundColor: itemType ? `${itemType.color}1a` : undefined }}
+                style={{ backgroundColor: `${item.itemType.color}1a` }}
               >
-                {Icon && <Icon className="size-4" style={{ color: itemType?.color }} />}
+                {Icon && <Icon className="size-4" style={{ color: item.itemType.color }} />}
               </div>
 
               <div className="min-w-0 flex-1">
@@ -45,7 +44,9 @@ export function ItemList({ title, items: listItems, emptyMessage }: ItemListProp
                   {item.isPinned && <Pin className="size-3.5 text-muted-foreground" />}
                   {item.isFavorite && <Star className="size-3.5 fill-amber-400 text-amber-400" />}
                 </div>
-                <p className="truncate text-sm text-muted-foreground">{item.description}</p>
+                {item.description && (
+                  <p className="truncate text-sm text-muted-foreground">{item.description}</p>
+                )}
                 {item.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {item.tags.map((tag) => (
