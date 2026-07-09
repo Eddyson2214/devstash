@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code, Folder, Layers, Star } from "lucide-react";
+import { ArrowRight, Code, Folder, Layers, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -19,16 +19,10 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  collections,
-  currentUser,
-  getRecentCollections,
-  itemTypes,
-  items,
-} from "@/lib/mock-data";
+import type { RecentCollection } from "@/lib/db/collections";
+import type { ItemTypeWithCount } from "@/lib/db/items";
+import { currentUser } from "@/lib/mock-data";
 import { TYPE_ICONS, typeHref } from "@/lib/type-icons";
-
-const RECENT_COLLECTIONS_LIMIT = 5;
 
 function userInitials(name: string) {
   return name
@@ -38,11 +32,14 @@ function userInitials(name: string) {
     .toUpperCase();
 }
 
-export function AppSidebar() {
-  const pathname = usePathname();
+interface AppSidebarProps {
+  itemTypes: ItemTypeWithCount[];
+  favoriteCollections: RecentCollection[];
+  recentCollections: RecentCollection[];
+}
 
-  const favoriteCollections = collections.filter((c) => c.isFavorite);
-  const recentCollections = getRecentCollections(RECENT_COLLECTIONS_LIMIT);
+export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }: AppSidebarProps) {
+  const pathname = usePathname();
 
   return (
     <Sidebar collapsible="icon">
@@ -64,7 +61,6 @@ export function AppSidebar() {
               {itemTypes.map((type) => {
                 const Icon = TYPE_ICONS[type.icon] ?? Code;
                 const href = typeHref(type.name);
-                const count = items.filter((item) => item.itemTypeId === type.id).length;
 
                 return (
                   <SidebarMenuItem key={type.id}>
@@ -76,7 +72,7 @@ export function AppSidebar() {
                       <Icon style={{ color: type.color }} />
                       <span>{type.name}</span>
                     </SidebarMenuButton>
-                    <SidebarMenuBadge>{count}</SidebarMenuBadge>
+                    <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                   </SidebarMenuItem>
                 );
               })}
@@ -113,8 +109,23 @@ export function AppSidebar() {
                     <Folder />
                     <span>{collection.name}</span>
                   </SidebarMenuButton>
+                  <SidebarMenuBadge>
+                    <span
+                      className="block size-2.5 rounded-full"
+                      style={{ backgroundColor: collection.accentColor ?? "var(--muted-foreground)" }}
+                    />
+                  </SidebarMenuBadge>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="View all collections"
+                  render={<Link href="/collections" />}
+                >
+                  <ArrowRight />
+                  <span>View all collections</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

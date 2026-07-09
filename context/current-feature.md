@@ -8,6 +8,14 @@ Completed
 ## Goals
 <!-- Goals and requirements -->
 
+Stats & Sidebar (see @context/features/stats-sidebar-spec.md)
+
+- Display stats in the main area from real database data instead of @src/lib/mock-data.ts, keeping the current design/layout
+- Display item types in the sidebar with their icons, linking to /items/[typename]
+- Add a "View all collections" link under the collections list that goes to /collections
+- Keep star icons for favorite collections; for recents, show a colored circle based on the most-used item type in that collection
+- Create @src/lib/db/items.ts with the database functions (reference @src/lib/db/collections.ts)
+
 ## Notes
 <!-- Any extra notes -->
 
@@ -21,3 +29,4 @@ Completed
 - 2026-07-07 - Seed data (demo user with bcryptjs-hashed password, 7 system item types, 5 collections with 18 items) implemented on `feature/seed-data`; idempotent re-seed verified, build and lint passing.
 - 2026-07-08 - Dashboard Collections (real Recent Collections data via new `src/lib/db/collections.ts`, fetched directly in the `RecentCollections` server component, border accent + type icons derived from the most-used item type per collection) implemented on `feature/dashboard-collections`; build and lint passing.
 - 2026-07-08 - Dashboard Items (real pinned/recent item data via new `src/lib/db/items.ts`, fetched directly in the `DashboardPage` server component, item card icon/border derived from item type, pinned section hidden when empty, stats cards wired to live item/collection counts via new `getCollectionStats`) implemented on `feature/dashboard-items`; build and lint passing.
+- 2026-07-09 - Stats & Sidebar (sidebar item types, favorite/recent collections, and "View all collections" links wired to Neon data via new `getItemTypesWithCounts` in `src/lib/db/items.ts` and new `getFavoriteCollections` in `src/lib/db/collections.ts`; recents show a colored circle by most-used item type, favorites keep the star badge; `AppSidebar` now receives data as props from `DashboardPage`; removed now-unused mock collections/items from `src/lib/mock-data.ts`) implemented on `feature/stats-sidebar`.

@@ -4,19 +4,29 @@ import { RecentCollections } from "@/components/dashboard/RecentCollections";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { getPinnedItems, getRecentItems } from "@/lib/db/items";
+import { getFavoriteCollections, getRecentCollections } from "@/lib/db/collections";
+import { getItemTypesWithCounts, getPinnedItems, getRecentItems } from "@/lib/db/items";
 
 const RECENT_ITEMS_LIMIT = 10;
+const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 export default async function DashboardPage() {
-  const [pinnedItems, recentItems] = await Promise.all([
-    getPinnedItems(),
-    getRecentItems(RECENT_ITEMS_LIMIT),
-  ]);
+  const [pinnedItems, recentItems, itemTypes, favoriteCollections, recentCollections] =
+    await Promise.all([
+      getPinnedItems(),
+      getRecentItems(RECENT_ITEMS_LIMIT),
+      getItemTypesWithCounts(),
+      getFavoriteCollections(),
+      getRecentCollections(SIDEBAR_RECENT_COLLECTIONS_LIMIT),
+    ]);
 
   return (
     <SidebarProvider className="min-h-screen">
-      <AppSidebar />
+      <AppSidebar
+        itemTypes={itemTypes}
+        favoriteCollections={favoriteCollections}
+        recentCollections={recentCollections}
+      />
       <SidebarInset>
         <Topbar />
         <main className="flex flex-1 flex-col gap-8 p-6">

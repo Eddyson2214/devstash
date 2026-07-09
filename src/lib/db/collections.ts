@@ -26,12 +26,52 @@ export interface CollectionStats {
   favorites: number;
 }
 
-export async function getRecentCollections(limit: number): Promise<RecentCollection[]> {
+interface CollectionWithItems {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  items: { item: { itemType: CollectionItemType } }[];
+}
+
+function toRecentCollection(collection: CollectionWithItems): RecentCollection {
+  const typeCounts = new Map<string, { count: number; type: CollectionItemType }>();
+
+  for (const { item } of collection.items) {
+    const existing = typeCounts.get(item.itemType.id);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      typeCounts.set(item.itemType.id, { count: 1, type: item.itemType });
+    }
+  }
+
+  const sortedTypes = [...typeCounts.values()].sort((a, b) => b.count - a.count);
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection.items.length,
+    itemTypes: sortedTypes.map((entry) => entry.type),
+    accentColor: sortedTypes[0]?.type.color ?? null,
+    createdAt: collection.createdAt,
+  };
+}
+
+async function getDemoUserId(): Promise<string | null> {
   const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
-  if (!user) return [];
+  return user?.id ?? null;
+}
+
+export async function getRecentCollections(limit: number): Promise<RecentCollection[]> {
+  const userId = await getDemoUserId();
+  if (!userId) return [];
 
   const collections = await prisma.collection.findMany({
-    where: { userId: user.id },
+    where: { userId },
     orderBy: { createdAt: "desc" },
     take: limit,
     include: {
@@ -45,40 +85,37 @@ export async function getRecentCollections(limit: number): Promise<RecentCollect
     },
   });
 
-  return collections.map((collection) => {
-    const typeCounts = new Map<string, { count: number; type: CollectionItemType }>();
+  return collections.map(toRecentCollection);
+}
 
-    for (const { item } of collection.items) {
-      const existing = typeCounts.get(item.itemType.id);
-      if (existing) {
-        existing.count += 1;
-      } else {
-        typeCounts.set(item.itemType.id, { count: 1, type: item.itemType });
-      }
-    }
+export async function getFavoriteCollections(): Promise<RecentCollection[]> {
+  const userId = await getDemoUserId();
+  if (!userId) return [];
 
-    const sortedTypes = [...typeCounts.values()].sort((a, b) => b.count - a.count);
-
-    return {
-      id: collection.id,
-      name: collection.name,
-      description: collection.description,
-      isFavorite: collection.isFavorite,
-      itemCount: collection.items.length,
-      itemTypes: sortedTypes.map((entry) => entry.type),
-      accentColor: sortedTypes[0]?.type.color ?? null,
-      createdAt: collection.createdAt,
-    };
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
   });
+
+  return collections.map(toRecentCollection);
 }
 
 export async function getCollectionStats(): Promise<CollectionStats> {
-  const user = await prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
-  if (!user) return { total: 0, favorites: 0 };
+  const userId = await getDemoUserId();
+  if (!userId) return { total: 0, favorites: 0 };
 
   const [total, favorites] = await Promise.all([
-    prisma.collection.count({ where: { userId: user.id } }),
-    prisma.collection.count({ where: { userId: user.id, isFavorite: true } }),
+    prisma.collection.count({ where: { userId } }),
+    prisma.collection.count({ where: { userId, isFavorite: true } }),
   ]);
 
   return { total, favorites };
