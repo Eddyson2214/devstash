@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Star } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,9 @@ export async function RecentCollections() {
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold">Recent Collections</h3>
-        <span className="text-sm text-muted-foreground">View all</span>
+        <Link href="/collections" className="text-sm text-muted-foreground hover:underline">
+          View all collections
+        </Link>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {recentCollections.map((collection) => (
