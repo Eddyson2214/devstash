@@ -1,20 +1,15 @@
-# Current Feature: Add Pro Badge to Sidebar
+# Current Feature
 <!--Feature name and short description -->
 
 ## Status
 
-In Progress
+Completed
 
 ## Goals
 <!-- Goals and requirements -->
-- Add a "PRO" badge to the File and Image item types in the sidebar
-- Use the ShadCN UI badge component
-- Badge should be clean and subtle in style
-- Badge text should be all uppercase ("PRO")
 
 ## Notes
 <!-- Any extra notes -->
-- Source spec: `context/features/add-pro-badge-sidebar.md`
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
@@ -27,3 +22,4 @@ In Progress
 - 2026-07-08 - Dashboard Collections (real Recent Collections data via new `src/lib/db/collections.ts`, fetched directly in the `RecentCollections` server component, border accent + type icons derived from the most-used item type per collection) implemented on `feature/dashboard-collections`; build and lint passing.
 - 2026-07-08 - Dashboard Items (real pinned/recent item data via new `src/lib/db/items.ts`, fetched directly in the `DashboardPage` server component, item card icon/border derived from item type, pinned section hidden when empty, stats cards wired to live item/collection counts via new `getCollectionStats`) implemented on `feature/dashboard-items`; build and lint passing.
 - 2026-07-09 - Stats & Sidebar (sidebar item types, favorite/recent collections, and "View all collections" links wired to Neon data via new `getItemTypesWithCounts` in `src/lib/db/items.ts` and new `getFavoriteCollections` in `src/lib/db/collections.ts`; recents show a colored circle by most-used item type, favorites keep the star badge; `AppSidebar` now receives data as props from `DashboardPage`; removed now-unused mock collections/items from `src/lib/mock-data.ts`) implemented on `feature/stats-sidebar`.
+- 2026-07-10 - Add Pro Badge to Sidebar (subtle uppercase "PRO" badge using the ShadCN `Badge` component, shown next to the File and Image item types in the sidebar's Types list, hidden when the sidebar is collapsed) implemented on `feature/add-pro-badge-sidebar`; build and lint passing.
