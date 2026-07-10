@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, Code, Folder, Layers, Star } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -70,7 +71,15 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
                       render={<Link href={href} />}
                     >
                       <Icon style={{ color: type.color }} />
-                      <span>{type.name}</span>
+                      <span className="truncate">{type.name}</span>
+                      {(type.name === "File" || type.name === "Image") && (
+                        <Badge
+                          variant="outline"
+                          className="h-4 px-1.5 text-[10px] font-medium tracking-wide text-muted-foreground group-data-[collapsible=icon]:hidden"
+                        >
+                          PRO
+                        </Badge>
+                      )}
                     </SidebarMenuButton>
                     <SidebarMenuBadge>{type.count}</SidebarMenuBadge>
                   </SidebarMenuItem>
