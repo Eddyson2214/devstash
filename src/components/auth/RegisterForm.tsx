@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,12 +15,10 @@ interface RegisterResponse {
 
 export function RegisterForm() {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
 
     const formData = new FormData(event.currentTarget);
     const name = formData.get("name") as string;
@@ -28,7 +27,7 @@ export function RegisterForm() {
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -42,13 +41,13 @@ export function RegisterForm() {
       const data: RegisterResponse = await response.json();
 
       if (!data.success) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        toast.error(data.error ?? "Something went wrong. Please try again.");
         return;
       }
 
-      router.push("/sign-in?registered=true");
+      router.push("/sign-in?auth=register-success");
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     } finally {
       setIsPending(false);
     }
@@ -86,8 +85,6 @@ export function RegisterForm() {
           required
         />
       </div>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? "Creating account..." : "Create account"}

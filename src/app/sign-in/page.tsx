@@ -7,19 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { authErrorMessage } from "@/lib/auth-errors";
 
 export const metadata: Metadata = {
   title: "Sign In - DevStash",
 };
 
 interface SignInPageProps {
-  searchParams: Promise<{ error?: string; callbackUrl?: string; registered?: string }>;
+  searchParams: Promise<{ callbackUrl?: string }>;
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { error, callbackUrl, registered } = await searchParams;
-  const errorMessage = authErrorMessage(error);
+  const { callbackUrl } = await searchParams;
 
   return (
     <div className="flex min-h-screen items-center justify-center p-6">
@@ -29,12 +27,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           <CardDescription>Your developer knowledge hub</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          {registered && (
-            <p className="text-sm text-emerald-500">
-              Account created. Sign in to continue.
-            </p>
-          )}
-
           <form action={signInWithGitHub}>
             <input type="hidden" name="callbackUrl" value={callbackUrl ?? ""} />
             <Button type="submit" variant="outline" className="w-full">
@@ -64,8 +56,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 required
               />
             </div>
-
-            {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
 
             <Button type="submit" className="w-full">
               Sign in
