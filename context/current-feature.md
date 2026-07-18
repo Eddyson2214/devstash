@@ -1,15 +1,26 @@
-# Current Feature
-<!--Feature name and short description -->
+# Current Feature: Email Verification on Register
 
 ## Status
 
-
+Implemented — pending review/commit
 
 ## Goals
-<!-- Goals and requirements -->
+
+- New users who register with email/password are NOT blocked from signing in before verifying — sign-in is allowed immediately, with a persistent reminder banner/toast shown until the email is verified (decision confirmed with user)
+- On successful registration, send a verification email via Resend containing a unique verification link
+- Clicking the link marks the user's email as verified (`User.emailVerified` in Prisma schema) and redirects into the app with a success toast
+- Expired or invalid tokens show a clear error and offer a way to request a new link (resend verification email)
+- GitHub OAuth users are unaffected — their email is considered pre-verified (existing behavior)
 
 ## Notes
-<!-- Any extra notes -->
+
+- Email provider: **Resend**. `RESEND_API_KEY` already exists in `.env` — confirmed present, do not print or log its value.
+- `VerificationToken` model already exists in `prisma/schema.prisma` (identifier, token, expires; `@@unique([identifier, token])`) — part of the NextAuth Prisma adapter models. Reuse this table rather than adding a new one, unless it proves unsuitable (e.g. need to store userId directly).
+- `User.emailVerified DateTime?` already exists on the `User` model — this is the field to set when verification succeeds.
+- Registration currently happens via `POST /api/auth/register` (Zod-validated, bcryptjs hashing at 12 rounds) — see `feature/auth-credentials-email-password` in History below for context.
+- Credentials sign-in `authorize` (in `src/auth.ts`) does NOT check `emailVerified` — unverified users can sign in freely. A banner/reminder for unverified users is a UI concern, shown post-login (e.g. dashboard or layout), not an auth gate.
+- Follows the standard workflow in `context/ai-interaction.md`: branch → implement → test in browser + `npm run build` → iterate → commit (only after approval) → merge → delete branch.
+- Install the `resend` npm package during implementation (not yet in `package.json`).
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

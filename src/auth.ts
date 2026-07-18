@@ -11,16 +11,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   callbacks: {
-    session({ session, token }) {
+    async session({ session, token }) {
       if (token.sub) {
         session.user.id = token.sub;
+        const user = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { emailVerified: true },
+        });
+        session.user.emailVerified = user?.emailVerified ?? null;
       }
       return session;
     },
   },
   ...authConfig,
   providers: [
-    GitHub,
+    GitHub({
+      profile(profile) {
+        return {
+          id: profile.id.toString(),
+          name: profile.name ?? profile.login,
+          email: profile.email,
+          image: profile.avatar_url,
+          emailVerified: profile.email ? new Date() : null,
+        };
+      },
+    }),
     Credentials({
       credentials: {
         email: {},

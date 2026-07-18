@@ -4,6 +4,7 @@ import { ItemList } from "@/components/dashboard/ItemList";
 import { RecentCollections } from "@/components/dashboard/RecentCollections";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { Topbar } from "@/components/dashboard/Topbar";
+import { VerifyEmailBanner } from "@/components/dashboard/VerifyEmailBanner";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
   getCollectionStats,
@@ -54,6 +55,8 @@ export default async function DashboardPage() {
       <SidebarInset>
         <Topbar />
         <main className="flex flex-1 flex-col gap-8 p-6">
+          {session?.user && !session.user.emailVerified && <VerifyEmailBanner />}
+
           <div>
             <h2 className="text-2xl font-bold">Dashboard</h2>
             <p className="text-muted-foreground">Your developer knowledge hub</p>

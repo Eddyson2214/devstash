@@ -10,6 +10,8 @@ const AUTH_EVENT_MESSAGES: Record<string, string> = {
   "login-success": "Signed in successfully.",
   "logout-success": "Signed out successfully.",
   "register-success": "Account created. Sign in to continue.",
+  "email-verified": "Email verified successfully.",
+  "verification-sent": "Verification email sent. Check your inbox.",
 };
 
 export function AuthToast() {

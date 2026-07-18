@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { issueVerificationEmail } from "@/lib/verification-token";
 
 const BCRYPT_ROUNDS = 12;
 
@@ -44,6 +45,12 @@ export async function POST(request: Request) {
     const user = await prisma.user.create({
       data: { name, email, password: passwordHash },
     });
+
+    try {
+      await issueVerificationEmail(email, new URL(request.url).origin);
+    } catch (error) {
+      console.error("Failed to send verification email:", error);
+    }
 
     return NextResponse.json(
       { success: true, data: { id: user.id, name: user.name, email: user.email } },
