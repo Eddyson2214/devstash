@@ -1,12 +1,15 @@
 import { Folder, Package, Star } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { getCollectionStats } from "@/lib/db/collections";
-import { getItemStats } from "@/lib/db/items";
+import type { CollectionStats } from "@/lib/db/collections";
+import type { ItemStats } from "@/lib/db/items";
 
-export async function StatsCards() {
-  const [itemStats, collectionStats] = await Promise.all([getItemStats(), getCollectionStats()]);
+interface StatsCardsProps {
+  itemStats: ItemStats;
+  collectionStats: CollectionStats;
+}
 
+export function StatsCards({ itemStats, collectionStats }: StatsCardsProps) {
   const stats = [
     { label: "Items", value: itemStats.total, icon: Package },
     { label: "Collections", value: collectionStats.total, icon: Folder },
@@ -20,7 +23,7 @@ export async function StatsCards() {
         <Card key={label}>
           <CardContent className="flex items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">
-              <Icon className="size-4 text-muted-foreground" />
+              <Icon className="size-4 text-muted-foreground" aria-hidden="true" />
             </div>
             <div>
               <p className="text-2xl font-semibold">{value}</p>

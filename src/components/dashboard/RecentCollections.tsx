@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { getRecentCollections } from "@/lib/db/collections";
+import type { RecentCollection } from "@/lib/db/collections";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
-const RECENT_COLLECTIONS_LIMIT = 6;
+interface RecentCollectionsProps {
+  recentCollections: RecentCollection[];
+}
 
-export async function RecentCollections() {
-  const recentCollections = await getRecentCollections(RECENT_COLLECTIONS_LIMIT);
-
+export function RecentCollections({ recentCollections }: RecentCollectionsProps) {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
@@ -30,7 +30,10 @@ export async function RecentCollections() {
                 <div className="flex items-center gap-1.5 font-medium">
                   <span>{collection.name}</span>
                   {collection.isFavorite && (
-                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <Star
+                      className="size-3.5 fill-amber-400 text-amber-400"
+                      aria-hidden="true"
+                    />
                   )}
                 </div>
                 <span className="shrink-0 text-sm text-muted-foreground">
@@ -43,7 +46,14 @@ export async function RecentCollections() {
               <div className="flex gap-2">
                 {collection.itemTypes.map((type) => {
                   const Icon = TYPE_ICONS[type.icon];
-                  return <Icon key={type.id} className="size-4" style={{ color: type.color }} />;
+                  return (
+                    <Icon
+                      key={type.id}
+                      className="size-4"
+                      style={{ color: type.color }}
+                      aria-hidden="true"
+                    />
+                  );
                 })}
               </div>
             </CardContent>

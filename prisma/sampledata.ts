@@ -1,7 +1,7 @@
 export const demoUser = {
   email: "demo@devstash.io",
   name: "Demo User",
-  password: "12345678", // hashed with bcryptjs at seed time, never stored in plaintext
+  password: "dev-demo-p4ssw0rd!", // hashed with bcryptjs at seed time, never stored in plaintext
   isPro: false,
 };
 

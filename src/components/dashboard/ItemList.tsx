@@ -35,14 +35,27 @@ export function ItemList({ title, items: listItems, emptyMessage }: ItemListProp
                 className="flex size-9 shrink-0 items-center justify-center rounded-md"
                 style={{ backgroundColor: `${item.itemType.color}1a` }}
               >
-                {Icon && <Icon className="size-4" style={{ color: item.itemType.color }} />}
+                {Icon && (
+                  <Icon
+                    className="size-4"
+                    style={{ color: item.itemType.color }}
+                    aria-hidden="true"
+                  />
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate font-medium">{item.title}</span>
-                  {item.isPinned && <Pin className="size-3.5 text-muted-foreground" />}
-                  {item.isFavorite && <Star className="size-3.5 fill-amber-400 text-amber-400" />}
+                  {item.isPinned && (
+                    <Pin className="size-3.5 text-muted-foreground" aria-hidden="true" />
+                  )}
+                  {item.isFavorite && (
+                    <Star
+                      className="size-3.5 fill-amber-400 text-amber-400"
+                      aria-hidden="true"
+                    />
+                  )}
                 </div>
                 {item.description && (
                   <p className="truncate text-sm text-muted-foreground">{item.description}</p>

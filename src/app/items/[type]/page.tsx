@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { itemTypes } from "@/lib/mock-data";
+import { typeHref } from "@/lib/type-icons";
 
 export default async function ItemTypePage({
   params,
@@ -8,7 +9,7 @@ export default async function ItemTypePage({
   params: Promise<{ type: string }>;
 }) {
   const { type } = await params;
-  const itemType = itemTypes.find((t) => `${t.name.toLowerCase()}s` === type);
+  const itemType = itemTypes.find((t) => typeHref(t.name) === `/items/${type}`);
 
   if (!itemType) {
     notFound();

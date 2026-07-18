@@ -48,7 +48,7 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href="/dashboard" />}>
-              <Layers className="text-primary" />
+              <Layers className="text-primary" aria-hidden="true" />
               <span className="font-semibold">DevStash</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -70,7 +70,7 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
                       tooltip={type.name}
                       render={<Link href={href} />}
                     >
-                      <Icon style={{ color: type.color }} />
+                      <Icon style={{ color: type.color }} aria-hidden="true" />
                       <span className="truncate">{type.name}</span>
                       {(type.name === "File" || type.name === "Image") && (
                         <Badge
@@ -96,11 +96,11 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
               {favoriteCollections.map((collection) => (
                 <SidebarMenuItem key={collection.id}>
                   <SidebarMenuButton tooltip={collection.name}>
-                    <Folder />
+                    <Folder aria-hidden="true" />
                     <span>{collection.name}</span>
                   </SidebarMenuButton>
                   <SidebarMenuBadge>
-                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                    <Star className="size-3 fill-amber-400 text-amber-400" aria-hidden="true" />
                   </SidebarMenuBadge>
                 </SidebarMenuItem>
               ))}
@@ -115,13 +115,14 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
               {recentCollections.map((collection) => (
                 <SidebarMenuItem key={collection.id}>
                   <SidebarMenuButton tooltip={collection.name}>
-                    <Folder />
+                    <Folder aria-hidden="true" />
                     <span>{collection.name}</span>
                   </SidebarMenuButton>
                   <SidebarMenuBadge>
                     <span
                       className="block size-2.5 rounded-full"
                       style={{ backgroundColor: collection.accentColor ?? "var(--muted-foreground)" }}
+                      aria-hidden="true"
                     />
                   </SidebarMenuBadge>
                 </SidebarMenuItem>
@@ -131,7 +132,7 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
                   tooltip="View all collections"
                   render={<Link href="/collections" />}
                 >
-                  <ArrowRight />
+                  <ArrowRight aria-hidden="true" />
                   <span>View all collections</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

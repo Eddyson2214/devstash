@@ -10,13 +10,21 @@ export function Topbar() {
       <SidebarTrigger />
 
       <div className="relative flex-1 max-w-md">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search items..." className="pl-9" readOnly />
+        <Search
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <Input
+          placeholder="Search items..."
+          aria-label="Search items"
+          className="pl-9"
+          readOnly
+        />
       </div>
 
       <div className="ml-auto flex items-center gap-2">
         <Button>
-          <Plus className="size-4" />
+          <Plus className="size-4" aria-hidden="true" />
           New Item
         </Button>
       </div>

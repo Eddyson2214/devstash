@@ -4,28 +4,44 @@ import { RecentCollections } from "@/components/dashboard/RecentCollections";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { getFavoriteCollections, getRecentCollections } from "@/lib/db/collections";
-import { getItemTypesWithCounts, getPinnedItems, getRecentItems } from "@/lib/db/items";
+import {
+  getCollectionStats,
+  getFavoriteCollections,
+  getRecentCollections,
+} from "@/lib/db/collections";
+import { getItemStats, getItemTypesWithCounts, getPinnedItems, getRecentItems } from "@/lib/db/items";
+
+export const dynamic = "force-dynamic";
 
 const RECENT_ITEMS_LIMIT = 10;
+const RECENT_COLLECTIONS_LIMIT = 6;
 const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 export default async function DashboardPage() {
-  const [pinnedItems, recentItems, itemTypes, favoriteCollections, recentCollections] =
-    await Promise.all([
-      getPinnedItems(),
-      getRecentItems(RECENT_ITEMS_LIMIT),
-      getItemTypesWithCounts(),
-      getFavoriteCollections(),
-      getRecentCollections(SIDEBAR_RECENT_COLLECTIONS_LIMIT),
-    ]);
+  const [
+    pinnedItems,
+    recentItems,
+    itemTypes,
+    favoriteCollections,
+    recentCollections,
+    itemStats,
+    collectionStats,
+  ] = await Promise.all([
+    getPinnedItems(),
+    getRecentItems(RECENT_ITEMS_LIMIT),
+    getItemTypesWithCounts(),
+    getFavoriteCollections(),
+    getRecentCollections(RECENT_COLLECTIONS_LIMIT),
+    getItemStats(),
+    getCollectionStats(),
+  ]);
 
   return (
     <SidebarProvider className="min-h-screen">
       <AppSidebar
         itemTypes={itemTypes}
         favoriteCollections={favoriteCollections}
-        recentCollections={recentCollections}
+        recentCollections={recentCollections.slice(0, SIDEBAR_RECENT_COLLECTIONS_LIMIT)}
       />
       <SidebarInset>
         <Topbar />
@@ -35,8 +51,8 @@ export default async function DashboardPage() {
             <p className="text-muted-foreground">Your developer knowledge hub</p>
           </div>
 
-          <StatsCards />
-          <RecentCollections />
+          <StatsCards itemStats={itemStats} collectionStats={collectionStats} />
+          <RecentCollections recentCollections={recentCollections} />
           {pinnedItems.length > 0 && <ItemList title="Pinned" items={pinnedItems} emptyMessage="" />}
           <ItemList title="Recent Items" items={recentItems} emptyMessage="No items yet." />
         </main>

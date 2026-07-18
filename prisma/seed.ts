@@ -2,8 +2,8 @@ import "dotenv/config";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import bcrypt from "bcryptjs";
 
-import { demoUser, seedCollections } from "../db/sampledata";
-import { systemItemTypes } from "../db/typesystem";
+import { demoUser, seedCollections } from "./sampledata";
+import { systemItemTypes } from "./typesystem";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const BCRYPT_ROUNDS = 12;
@@ -61,45 +61,49 @@ async function seedCollectionsAndItems(userId: string, itemTypeIdByName: Record<
     return;
   }
 
-  for (const seedCollection of seedCollections) {
-    const collection = await prisma.collection.create({
-      data: {
-        name: seedCollection.name,
-        description: seedCollection.description,
-        userId,
-      },
-    });
-
-    for (const seedItem of seedCollection.items) {
-      const itemTypeId = itemTypeIdByName[seedItem.itemType];
-      if (!itemTypeId) {
-        throw new Error(`Unknown item type "${seedItem.itemType}" for item "${seedItem.title}"`);
-      }
-
-      const item = await prisma.item.create({
+  await Promise.all(
+    seedCollections.map(async (seedCollection) => {
+      const collection = await prisma.collection.create({
         data: {
-          title: seedItem.title,
-          description: seedItem.description,
-          contentType: seedItem.contentType,
-          content: seedItem.content,
-          url: seedItem.url,
-          language: seedItem.language,
+          name: seedCollection.name,
+          description: seedCollection.description,
           userId,
-          itemTypeId,
-          tags: {
-            connectOrCreate: seedItem.tags.map((tag) => ({
-              where: { name: tag },
-              create: { name: tag },
-            })),
-          },
         },
       });
 
-      await prisma.itemCollection.create({
-        data: { itemId: item.id, collectionId: collection.id },
+      const items = await Promise.all(
+        seedCollection.items.map((seedItem) => {
+          const itemTypeId = itemTypeIdByName[seedItem.itemType];
+          if (!itemTypeId) {
+            throw new Error(`Unknown item type "${seedItem.itemType}" for item "${seedItem.title}"`);
+          }
+
+          return prisma.item.create({
+            data: {
+              title: seedItem.title,
+              description: seedItem.description,
+              contentType: seedItem.contentType,
+              content: seedItem.content,
+              url: seedItem.url,
+              language: seedItem.language,
+              userId,
+              itemTypeId,
+              tags: {
+                connectOrCreate: seedItem.tags.map((tag) => ({
+                  where: { name: tag },
+                  create: { name: tag },
+                })),
+              },
+            },
+          });
+        }),
+      );
+
+      await prisma.itemCollection.createMany({
+        data: items.map((item) => ({ itemId: item.id, collectionId: collection.id })),
       });
-    }
-  }
+    }),
+  );
 
   console.log(`Seeded ${seedCollections.length} collections`);
 }
