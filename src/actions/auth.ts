@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 
 import { auth, signIn, signOut } from "@/auth";
+import { isEmailVerificationEnabled } from "@/lib/feature-flags";
 import { issueVerificationEmail } from "@/lib/verification-token";
 
 function withAuthMarker(url: string, marker: string): string {
@@ -50,6 +51,10 @@ export async function signOutAction() {
 }
 
 export async function resendVerificationEmail() {
+  if (!isEmailVerificationEnabled()) {
+    return { success: false, error: "Email verification is currently disabled." };
+  }
+
   const session = await auth();
   if (!session?.user?.email || session.user.emailVerified) {
     return { success: false, error: "No unverified email on this account." };

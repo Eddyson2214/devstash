@@ -1,15 +1,23 @@
-# Current Feature
-<!--Feature name and short description -->
+# Current Feature: Email Verification Feature Flag
 
 ## Status
 
-
+Implemented — pending review/commit
 
 ## Goals
-<!-- Goals and requirements -->
+
+- Add an env var flag, `EMAIL_VERIFICATION_ENABLED`, that toggles the entire email-verification system on/off without code changes. Defaults to enabled (current behavior) when unset — set `EMAIL_VERIFICATION_ENABLED=false` in `.env` to turn it off.
+- When disabled: `POST /api/auth/register` skips creating a `VerificationToken` and skips the Resend call entirely — new users are created with `emailVerified` set immediately, so they're treated as pre-verified.
+- When disabled: the dashboard `VerifyEmailBanner` never appears and `resendVerificationEmail` short-circuits with a clear "verification is currently disabled" result if somehow invoked — this is a safety net, since the banner naturally won't render once new users are auto-verified.
+- When enabled: behavior is unchanged from the existing `feature/email-verification-on-register` implementation.
+- Centralize the check in one small helper (e.g. `src/lib/feature-flags.ts`) so the register route and the resend action read the same source of truth rather than checking `process.env` inline in multiple places.
 
 ## Notes
-<!-- Any extra notes -->
+
+- Motivation: Resend has no verified sending domain yet, so the current sandbox sender (`onboarding@resend.dev`) can only actually deliver to the Resend account owner's own email — sending to arbitrary registration emails fails server-side (caught and logged, doesn't break registration, but isn't a clean state to demo). This flag is a stopgap until a domain is verified in Resend.
+- Builds directly on `feature/email-verification-on-register` (see History): `src/app/api/auth/register/route.ts`, `src/actions/auth.ts` (`resendVerificationEmail`), `src/components/dashboard/VerifyEmailBanner.tsx`, `src/lib/verification-token.ts` (`issueVerificationEmail`).
+- No changes needed to `GET /api/auth/verify-email` itself — with the flag off, no tokens are ever created, so the route simply won't be hit via real links (direct/malformed requests still hit the existing invalid-token path, which is fine).
+- Only a single boolean env var is needed — no admin UI or per-user override was requested.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

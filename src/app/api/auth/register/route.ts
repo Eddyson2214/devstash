@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 
+import { isEmailVerificationEnabled } from "@/lib/feature-flags";
 import { prisma } from "@/lib/prisma";
 import { issueVerificationEmail } from "@/lib/verification-token";
 
@@ -42,14 +43,22 @@ export async function POST(request: Request) {
 
   try {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const verificationEnabled = isEmailVerificationEnabled();
     const user = await prisma.user.create({
-      data: { name, email, password: passwordHash },
+      data: {
+        name,
+        email,
+        password: passwordHash,
+        emailVerified: verificationEnabled ? null : new Date(),
+      },
     });
 
-    try {
-      await issueVerificationEmail(email, new URL(request.url).origin);
-    } catch (error) {
-      console.error("Failed to send verification email:", error);
+    if (verificationEnabled) {
+      try {
+        await issueVerificationEmail(email, new URL(request.url).origin);
+      } catch (error) {
+        console.error("Failed to send verification email:", error);
+      }
     }
 
     return NextResponse.json(
