@@ -1,26 +1,15 @@
-# Current Feature: Email Verification on Register
+# Current Feature
+<!--Feature name and short description -->
 
 ## Status
 
-Implemented — pending review/commit
+
 
 ## Goals
-
-- New users who register with email/password are NOT blocked from signing in before verifying — sign-in is allowed immediately, with a persistent reminder banner/toast shown until the email is verified (decision confirmed with user)
-- On successful registration, send a verification email via Resend containing a unique verification link
-- Clicking the link marks the user's email as verified (`User.emailVerified` in Prisma schema) and redirects into the app with a success toast
-- Expired or invalid tokens show a clear error and offer a way to request a new link (resend verification email)
-- GitHub OAuth users are unaffected — their email is considered pre-verified (existing behavior)
+<!-- Goals and requirements -->
 
 ## Notes
-
-- Email provider: **Resend**. `RESEND_API_KEY` already exists in `.env` — confirmed present, do not print or log its value.
-- `VerificationToken` model already exists in `prisma/schema.prisma` (identifier, token, expires; `@@unique([identifier, token])`) — part of the NextAuth Prisma adapter models. Reuse this table rather than adding a new one, unless it proves unsuitable (e.g. need to store userId directly).
-- `User.emailVerified DateTime?` already exists on the `User` model — this is the field to set when verification succeeds.
-- Registration currently happens via `POST /api/auth/register` (Zod-validated, bcryptjs hashing at 12 rounds) — see `feature/auth-credentials-email-password` in History below for context.
-- Credentials sign-in `authorize` (in `src/auth.ts`) does NOT check `emailVerified` — unverified users can sign in freely. A banner/reminder for unverified users is a UI concern, shown post-login (e.g. dashboard or layout), not an auth gate.
-- Follows the standard workflow in `context/ai-interaction.md`: branch → implement → test in browser + `npm run build` → iterate → commit (only after approval) → merge → delete branch.
-- Install the `resend` npm package during implementation (not yet in `package.json`).
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
@@ -39,3 +28,4 @@ Implemented — pending review/commit
 - 2026-07-18 - Auth Credentials - Email/Password Provider (Credentials provider placeholder in `src/auth.config.ts`; real bcrypt-based `authorize` override in `src/auth.ts`, returning only `{id, name, email, image}` to avoid leaking the password hash into the JWT; new `POST /api/auth/register` route with Zod-validated input, duplicate-email check, bcryptjs hashing at 12 rounds; installed `zod` per coding-standards.md) implemented on `feature/auth-credentials-email-password`; build, lint, curl, and browser sign-in verified (GitHub OAuth still functional).
 - 2026-07-18 - Auth UI - Sign In, Register & Sign Out (custom `/sign-in` and `/register` pages replacing NextAuth's default pages; new `src/actions/auth.ts` Server Actions for credentials sign-in, GitHub sign-in, and sign-out; new reusable `UserAvatar` component (GitHub image or initials fallback); `AppSidebar` footer now shows the real session user in a dropdown with Profile/Sign-out; new minimal `/profile` page; `proxy.ts` now protects `/profile` too and redirects to `/sign-in`; added shadcn `dropdown-menu` and `label` components; removed the now-dead mock `currentUser`) implemented on `feature/auth-ui-signin-register-signout`; build, lint, and full browser walkthrough of all 7 testing-plan steps verified.
 - 2026-07-18 - Auth Toast Notifications (added `sonner` + new `src/components/ui/sonner.tsx` Toaster, hardcoded to dark theme; new `AuthToast` client component mounted once in the root layout, reading `?auth=`/`?error=` query params via `useSearchParams` and firing a toast for login/logout/register success or any failed auth attempt, then stripping those params from the URL; `src/actions/auth.ts` now appends `?auth=login-success`/`?auth=logout-success` to redirect targets; `RegisterForm` now uses `toast.error(...)` instead of inline text; removed the now-redundant inline error/success paragraphs from `/sign-in`) implemented on `feature/auth-toast-notifications`; build, lint, and browser-verified for all 6 directly-testable scenarios (login success/failure, logout, register success/failure/duplicate-email) by inspecting `[data-sonner-toast]` directly since toasts auto-dismiss quickly; caught and fixed a bug where the toast effect's empty dependency array meant it only fired once per layout mount instead of on every auth-redirect.
+- 2026-07-18 - Email Verification on Register (installed `resend`; new `src/lib/email.ts` + `src/lib/verification-token.ts` issuing 24h tokens via the existing `VerificationToken` model; `POST /api/auth/register` now sends a verification email after user creation; new `GET /api/auth/verify-email` route validates the token, sets `User.emailVerified`, deletes the token, and redirects with an `email-verified` toast marker; GitHub OAuth sign-ups auto-verified via a custom `profile()` callback on the GitHub provider in `src/auth.ts`; `session` callback now exposes live `emailVerified` status, extended in `src/types/next-auth.d.ts`; sign-in is NOT gated on verification (decision confirmed with user) — instead a new `VerifyEmailBanner` on the dashboard shows a persistent reminder with a "Resend email" button wired to a new `resendVerificationEmail` server action; new `invalid-token`/`expired-token`/`verification-sent` toast messages) implemented on `feature/email-verification-on-register`; build and lint passing, full browser walkthrough via Playwright verified (register → email issued → verify link → banner for unverified sign-in → resend → re-verify → banner cleared, plus the invalid-token error path), test accounts cleaned up from the Neon `development` branch afterward.
