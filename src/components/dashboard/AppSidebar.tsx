@@ -2,10 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, Code, Folder, Layers, Star } from "lucide-react";
+import { ArrowRight, Code, Folder, Layers, LogOut, Star, User as UserIcon } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { signOutAction } from "@/actions/auth";
+import { UserAvatar } from "@/components/auth/UserAvatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -22,24 +30,22 @@ import {
 } from "@/components/ui/sidebar";
 import type { RecentCollection } from "@/lib/db/collections";
 import type { ItemTypeWithCount } from "@/lib/db/items";
-import { currentUser } from "@/lib/mock-data";
 import { TYPE_ICONS, typeHref } from "@/lib/type-icons";
 
-function userInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
+interface SidebarUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 }
 
 interface AppSidebarProps {
   itemTypes: ItemTypeWithCount[];
   favoriteCollections: RecentCollection[];
   recentCollections: RecentCollection[];
+  user: SidebarUser;
 }
 
-export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }: AppSidebarProps) {
+export function AppSidebar({ itemTypes, favoriteCollections, recentCollections, user }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -144,15 +150,30 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections }
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg">
-              <Avatar className="size-6">
-                <AvatarFallback>{userInitials(currentUser.name)}</AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
-                <span className="truncate text-sm font-medium">{currentUser.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{currentUser.email}</span>
-              </div>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <SidebarMenuButton size="lg">
+                    <UserAvatar name={user.name} image={user.image} />
+                    <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
+                      <span className="truncate text-sm font-medium">{user.name ?? "Unknown"}</span>
+                      <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                    </div>
+                  </SidebarMenuButton>
+                }
+              />
+              <DropdownMenuContent side="top" align="start">
+                <DropdownMenuItem render={<Link href="/profile" />}>
+                  <UserIcon aria-hidden="true" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onClick={() => signOutAction()}>
+                  <LogOut aria-hidden="true" />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

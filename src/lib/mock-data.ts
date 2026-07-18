@@ -1,10 +1,3 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string | null;
-}
-
 export interface ItemType {
   id: string;
   name: string;
@@ -12,13 +5,6 @@ export interface ItemType {
   color: string;
   isSystem: boolean;
 }
-
-export const currentUser: User = {
-  id: "user-1",
-  name: "John Doe",
-  email: "john@example.com",
-  image: null,
-};
 
 export const itemTypes: ItemType[] = [
   { id: "type-snippet", name: "Snippet", icon: "Code", color: "#3b82f6", isSystem: true },

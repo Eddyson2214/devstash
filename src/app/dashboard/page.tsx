@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { ItemList } from "@/components/dashboard/ItemList";
 import { RecentCollections } from "@/components/dashboard/RecentCollections";
@@ -19,6 +20,7 @@ const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 export default async function DashboardPage() {
   const [
+    session,
     pinnedItems,
     recentItems,
     itemTypes,
@@ -27,6 +29,7 @@ export default async function DashboardPage() {
     itemStats,
     collectionStats,
   ] = await Promise.all([
+    auth(),
     getPinnedItems(),
     getRecentItems(RECENT_ITEMS_LIMIT),
     getItemTypesWithCounts(),
@@ -42,6 +45,11 @@ export default async function DashboardPage() {
         itemTypes={itemTypes}
         favoriteCollections={favoriteCollections}
         recentCollections={recentCollections.slice(0, SIDEBAR_RECENT_COLLECTIONS_LIMIT)}
+        user={{
+          name: session?.user?.name,
+          email: session?.user?.email,
+          image: session?.user?.image,
+        }}
       />
       <SidebarInset>
         <Topbar />
