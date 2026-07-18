@@ -1,23 +1,15 @@
-# Current Feature: Email Verification Feature Flag
+# Current Feature
+<!--Feature name and short description -->
 
 ## Status
 
-Implemented — pending review/commit
+
 
 ## Goals
-
-- Add an env var flag, `EMAIL_VERIFICATION_ENABLED`, that toggles the entire email-verification system on/off without code changes. Defaults to enabled (current behavior) when unset — set `EMAIL_VERIFICATION_ENABLED=false` in `.env` to turn it off.
-- When disabled: `POST /api/auth/register` skips creating a `VerificationToken` and skips the Resend call entirely — new users are created with `emailVerified` set immediately, so they're treated as pre-verified.
-- When disabled: the dashboard `VerifyEmailBanner` never appears and `resendVerificationEmail` short-circuits with a clear "verification is currently disabled" result if somehow invoked — this is a safety net, since the banner naturally won't render once new users are auto-verified.
-- When enabled: behavior is unchanged from the existing `feature/email-verification-on-register` implementation.
-- Centralize the check in one small helper (e.g. `src/lib/feature-flags.ts`) so the register route and the resend action read the same source of truth rather than checking `process.env` inline in multiple places.
+<!-- Goals and requirements -->
 
 ## Notes
-
-- Motivation: Resend has no verified sending domain yet, so the current sandbox sender (`onboarding@resend.dev`) can only actually deliver to the Resend account owner's own email — sending to arbitrary registration emails fails server-side (caught and logged, doesn't break registration, but isn't a clean state to demo). This flag is a stopgap until a domain is verified in Resend.
-- Builds directly on `feature/email-verification-on-register` (see History): `src/app/api/auth/register/route.ts`, `src/actions/auth.ts` (`resendVerificationEmail`), `src/components/dashboard/VerifyEmailBanner.tsx`, `src/lib/verification-token.ts` (`issueVerificationEmail`).
-- No changes needed to `GET /api/auth/verify-email` itself — with the flag off, no tokens are ever created, so the route simply won't be hit via real links (direct/malformed requests still hit the existing invalid-token path, which is fine).
-- Only a single boolean env var is needed — no admin UI or per-user override was requested.
+<!-- Any extra notes -->
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
@@ -37,3 +29,4 @@ Implemented — pending review/commit
 - 2026-07-18 - Auth UI - Sign In, Register & Sign Out (custom `/sign-in` and `/register` pages replacing NextAuth's default pages; new `src/actions/auth.ts` Server Actions for credentials sign-in, GitHub sign-in, and sign-out; new reusable `UserAvatar` component (GitHub image or initials fallback); `AppSidebar` footer now shows the real session user in a dropdown with Profile/Sign-out; new minimal `/profile` page; `proxy.ts` now protects `/profile` too and redirects to `/sign-in`; added shadcn `dropdown-menu` and `label` components; removed the now-dead mock `currentUser`) implemented on `feature/auth-ui-signin-register-signout`; build, lint, and full browser walkthrough of all 7 testing-plan steps verified.
 - 2026-07-18 - Auth Toast Notifications (added `sonner` + new `src/components/ui/sonner.tsx` Toaster, hardcoded to dark theme; new `AuthToast` client component mounted once in the root layout, reading `?auth=`/`?error=` query params via `useSearchParams` and firing a toast for login/logout/register success or any failed auth attempt, then stripping those params from the URL; `src/actions/auth.ts` now appends `?auth=login-success`/`?auth=logout-success` to redirect targets; `RegisterForm` now uses `toast.error(...)` instead of inline text; removed the now-redundant inline error/success paragraphs from `/sign-in`) implemented on `feature/auth-toast-notifications`; build, lint, and browser-verified for all 6 directly-testable scenarios (login success/failure, logout, register success/failure/duplicate-email) by inspecting `[data-sonner-toast]` directly since toasts auto-dismiss quickly; caught and fixed a bug where the toast effect's empty dependency array meant it only fired once per layout mount instead of on every auth-redirect.
 - 2026-07-18 - Email Verification on Register (installed `resend`; new `src/lib/email.ts` + `src/lib/verification-token.ts` issuing 24h tokens via the existing `VerificationToken` model; `POST /api/auth/register` now sends a verification email after user creation; new `GET /api/auth/verify-email` route validates the token, sets `User.emailVerified`, deletes the token, and redirects with an `email-verified` toast marker; GitHub OAuth sign-ups auto-verified via a custom `profile()` callback on the GitHub provider in `src/auth.ts`; `session` callback now exposes live `emailVerified` status, extended in `src/types/next-auth.d.ts`; sign-in is NOT gated on verification (decision confirmed with user) — instead a new `VerifyEmailBanner` on the dashboard shows a persistent reminder with a "Resend email" button wired to a new `resendVerificationEmail` server action; new `invalid-token`/`expired-token`/`verification-sent` toast messages) implemented on `feature/email-verification-on-register`; build and lint passing, full browser walkthrough via Playwright verified (register → email issued → verify link → banner for unverified sign-in → resend → re-verify → banner cleared, plus the invalid-token error path), test accounts cleaned up from the Neon `development` branch afterward.
+- 2026-07-18 - Email Verification Feature Flag (new `src/lib/feature-flags.ts` with `isEmailVerificationEnabled()`, reading `EMAIL_VERIFICATION_ENABLED` from `.env`, default enabled unless explicitly `"false"`; `POST /api/auth/register` now skips creating a `VerificationToken`/sending the Resend email and sets `emailVerified` immediately on the new user when the flag is off; `resendVerificationEmail` in `src/actions/auth.ts` short-circuits with a clear message when the flag is off, as a safety net) implemented on `feature/email-verification-flag`; motivated by Resend having no verified sending domain yet (sandbox sender can only deliver to the account owner's own email); build and lint passing, browser-verified both flag states end-to-end (flag off: user auto-verified, no token row, no banner; flag on: unchanged token/banner flow), `.env` left with `EMAIL_VERIFICATION_ENABLED=false` since no domain is verified yet, test accounts cleaned up from the Neon `development` branch afterward.
