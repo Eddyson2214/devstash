@@ -3,6 +3,8 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   OAuthAccountNotLinked: "That email is already linked to a different sign-in method.",
   "invalid-token": "That verification link is invalid. Request a new one from your dashboard.",
   "expired-token": "That verification link has expired. Request a new one from your dashboard.",
+  "invalid-reset-token": "That password reset link is invalid. Request a new one.",
+  "expired-reset-token": "That password reset link has expired. Request a new one.",
 };
 
 export function authErrorMessage(type?: string | null): string | null {

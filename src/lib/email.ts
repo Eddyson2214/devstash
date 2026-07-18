@@ -15,3 +15,16 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
     `,
   });
 }
+
+export async function sendPasswordResetEmail(to: string, resetUrl: string) {
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: "Reset your DevStash password",
+    html: `
+      <p>We received a request to reset your DevStash password.</p>
+      <p><a href="${resetUrl}">Reset my password</a></p>
+      <p>This link expires in 1 hour. If you didn't request a password reset, you can ignore this email.</p>
+    `,
+  });
+}

@@ -1,15 +1,25 @@
-# Current Feature
+# Current Feature: Forgot Password
 <!--Feature name and short description -->
+Add a "Forgot password?" link and full forgot/reset password flow for credentials-based accounts, reusing the existing `VerificationToken` model.
 
 ## Status
-
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Add a "Forgot password?" link on `/sign-in` below the credentials form.
+- New `/forgot-password` page: email input, submits to a Server Action. Always shows a generic "if that email exists, we've sent a reset link" response/toast regardless of whether the email is registered (avoid user enumeration).
+- Only issue a reset token when the account is credentials-based (`User.password` is non-null) — GitHub-only users have no password to reset, so silently no-op (still show the generic success message).
+- Reuse the existing `VerificationToken` model (`identifier` = email, `token`, `expires`) for reset tokens, following the same `randomBytes` token pattern as `src/lib/verification-token.ts`. Use a shorter expiry than the 24h email-verification token (e.g. 1 hour), since this token grants a password change.
+- New `/reset-password` page: reads `token` + `email` from query params, form for new password + confirm password (reuse the same Zod validation shape as register: min 8 chars, confirm match).
+- New Server Action/route that validates the token (exists, matches identifier, not expired), hashes the new password with bcrypt (12 rounds, matching register), updates `User.password`, deletes the token, and redirects to `/sign-in` with a success toast.
+- New `sendPasswordResetEmail` in `src/lib/email.ts`, following the existing `sendVerificationEmail` template style.
+- Extend `AuthToast`/`auth-errors.ts` with new codes for the reset flow (e.g. `reset-email-sent`, `password-reset-success`) rather than reusing `invalid-token`/`expired-token` copy as-is, since that copy currently says "verification link" — either add reset-specific copy or generalize the wording.
 
 ## Notes
 <!-- Any extra notes -->
+- Decision confirmed with user: no `type`/`purpose` column will be added to `VerificationToken`. Password-reset and email-verification tokens share the same `(identifier, token)` keyspace, and each flow's `deleteMany({ identifier: email })` will invalidate the other's pending token for that email. Accepted as a rare edge case, not fixed in this feature.
+- Password reset emails go through Resend, same as verification emails. `EMAIL_VERIFICATION_ENABLED=false` in `.env` currently, because there's no verified sending domain yet (sandbox mode only delivers to the account owner's own email) — same delivery limitation applies here, so end-to-end testing will be limited to the account owner's own email unless a domain gets verified.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
