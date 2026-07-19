@@ -9,6 +9,15 @@ import { z } from "zod";
 import { auth, signIn, signOut } from "@/auth";
 import { isEmailVerificationEnabled } from "@/lib/feature-flags";
 import { prisma } from "@/lib/prisma";
+import {
+  checkRateLimit,
+  forgotPasswordRatelimit,
+  getClientIp,
+  RATE_LIMIT_ERROR_CODE,
+  RATE_LIMIT_MESSAGE,
+  resendVerificationRatelimit,
+  resetPasswordRatelimit,
+} from "@/lib/rate-limit";
 import { issuePasswordResetToken, issueVerificationEmail } from "@/lib/verification-token";
 
 const BCRYPT_ROUNDS = 12;
@@ -66,6 +75,15 @@ export async function resendVerificationEmail() {
   }
 
   const requestHeaders = await headers();
+  const ip = getClientIp(requestHeaders);
+  const { success: withinLimit } = await checkRateLimit(
+    resendVerificationRatelimit,
+    `${ip}:${session.user.email}`
+  );
+  if (!withinLimit) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
+
   const origin = requestHeaders.get("origin") ?? `https://${requestHeaders.get("host")}`;
 
   try {
@@ -83,14 +101,20 @@ const forgotPasswordSchema = z.object({
 
 export async function requestPasswordReset(
   formData: FormData
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; error?: string }> {
+  const requestHeaders = await headers();
+  const ip = getClientIp(requestHeaders);
+  const { success: withinLimit } = await checkRateLimit(forgotPasswordRatelimit, ip);
+  if (!withinLimit) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
+
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
 
   if (parsed.success) {
     const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
 
     if (user?.password) {
-      const requestHeaders = await headers();
       const origin = requestHeaders.get("origin") ?? `https://${requestHeaders.get("host")}`;
 
       try {
@@ -120,6 +144,13 @@ const resetPasswordSchema = z
 export async function resetPassword(
   formData: FormData
 ): Promise<{ success: boolean; error?: string }> {
+  const requestHeaders = await headers();
+  const ip = getClientIp(requestHeaders);
+  const { success: withinLimit } = await checkRateLimit(resetPasswordRatelimit, ip);
+  if (!withinLimit) {
+    return { success: false, error: RATE_LIMIT_ERROR_CODE };
+  }
+
   const parsed = resetPasswordSchema.safeParse({
     token: formData.get("token"),
     email: formData.get("email"),

@@ -20,7 +20,13 @@ export function ForgotPasswordForm() {
 
     setIsPending(true);
     try {
-      await requestPasswordReset(formData);
+      const result = await requestPasswordReset(formData);
+
+      if (!result.success) {
+        toast.error(result.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+
       router.push("/sign-in?auth=reset-email-sent");
     } catch {
       toast.error("Something went wrong. Please try again.");

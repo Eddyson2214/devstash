@@ -4,6 +4,13 @@ import { z } from "zod";
 
 import { isEmailVerificationEnabled } from "@/lib/feature-flags";
 import { prisma } from "@/lib/prisma";
+import {
+  checkRateLimit,
+  getClientIp,
+  RATE_LIMIT_MESSAGE,
+  registerRatelimit,
+  retryAfterSeconds,
+} from "@/lib/rate-limit";
 import { issueVerificationEmail } from "@/lib/verification-token";
 
 const BCRYPT_ROUNDS = 12;
@@ -21,6 +28,15 @@ const registerSchema = z
   });
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request.headers);
+  const { success: withinLimit, reset } = await checkRateLimit(registerRatelimit, ip);
+  if (!withinLimit) {
+    return NextResponse.json(
+      { success: false, error: RATE_LIMIT_MESSAGE },
+      { status: 429, headers: { "Retry-After": String(retryAfterSeconds(reset)) } }
+    );
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = registerSchema.safeParse(body);
 
