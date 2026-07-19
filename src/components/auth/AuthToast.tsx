@@ -14,6 +14,7 @@ const AUTH_EVENT_MESSAGES: Record<string, string> = {
   "verification-sent": "Verification email sent. Check your inbox.",
   "reset-email-sent": "If that email is registered, a reset link has been sent.",
   "password-reset-success": "Password reset successfully. Sign in with your new password.",
+  "account-deleted": "Your account has been deleted.",
 };
 
 export function AuthToast() {

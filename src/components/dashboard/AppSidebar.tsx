@@ -154,7 +154,7 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections, 
               <DropdownMenuTrigger
                 render={
                   <SidebarMenuButton size="lg">
-                    <UserAvatar name={user.name} image={user.image} />
+                    <UserAvatar name={user.name} email={user.email} image={user.image} />
                     <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
                       <span className="truncate text-sm font-medium">{user.name ?? "Unknown"}</span>
                       <span className="truncate text-xs text-muted-foreground">{user.email}</span>
