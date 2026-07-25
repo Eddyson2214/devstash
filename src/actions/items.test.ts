@@ -6,14 +6,16 @@ vi.mock("@/auth", () => ({
 
 vi.mock("@/lib/db/items", () => ({
   updateItem: vi.fn(),
+  deleteItem: vi.fn(),
 }));
 
 import { auth } from "@/auth";
-import { updateItem as updateItemQuery } from "@/lib/db/items";
-import { updateItem } from "@/actions/items";
+import { deleteItem as deleteItemQuery, updateItem as updateItemQuery } from "@/lib/db/items";
+import { deleteItem, updateItem } from "@/actions/items";
 
 const mockedAuth = vi.mocked(auth);
 const mockedUpdateItemQuery = vi.mocked(updateItemQuery);
+const mockedDeleteItemQuery = vi.mocked(deleteItemQuery);
 
 const validInput = {
   title: "Updated title",
@@ -80,5 +82,38 @@ describe("updateItem", () => {
 
     expect(result).toEqual({ success: true, data: updated });
     expect(mockedUpdateItemQuery).toHaveBeenCalledWith("item-1", "user-1", validInput);
+  });
+});
+
+describe("deleteItem", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedDeleteItemQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the item doesn't exist or isn't owned by the session user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedDeleteItemQuery.mockResolvedValue(false);
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: false, error: "Item not found" });
+  });
+
+  it("deletes the item on success", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedDeleteItemQuery.mockResolvedValue(true);
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: true });
+    expect(mockedDeleteItemQuery).toHaveBeenCalledWith("item-1", "user-1");
   });
 });

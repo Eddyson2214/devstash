@@ -5,7 +5,18 @@ import { useRouter } from "next/navigation";
 import { Copy, Pencil, Pin, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { updateItem } from "@/actions/items";
+import { deleteItem, updateItem } from "@/actions/items";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,6 +67,8 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   );
   const [form, setForm] = useState<EditFormState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!open || !itemId) return;
@@ -150,6 +163,24 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleDelete() {
+    if (!item) return;
+
+    setDeleting(true);
+    const response = await deleteItem(item.id);
+    setDeleting(false);
+
+    if (!response.success) {
+      toast.error(response.error);
+      return;
+    }
+
+    setConfirmingDelete(false);
+    toast.success("Item deleted");
+    handleOpenChange(false);
+    router.refresh();
+  }
+
   const Icon = item ? TYPE_ICONS[item.itemType.icon] : null;
   const copyText = item?.content ?? item?.url ?? "";
 
@@ -215,10 +246,31 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                       <Pencil aria-hidden="true" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="icon-sm" disabled title="Coming soon">
-                      <Trash2 className="text-destructive" aria-hidden="true" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+                    <AlertDialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
+                      <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
+                        <Trash2 className="text-destructive" aria-hidden="true" />
+                        <span className="sr-only">Delete</span>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this item?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This permanently deletes &ldquo;{item.title}&rdquo;. This action
+                            cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            variant="destructive"
+                            disabled={deleting}
+                            onClick={handleDelete}
+                          >
+                            {deleting ? "Deleting..." : "Delete"}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               )}

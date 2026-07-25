@@ -1,15 +1,25 @@
-# Current Feature
+# Current Feature: Item Delete
 <!--Feature name and short description -->
+Delete button in the item drawer's action bar deletes the item, guarded by a shadcn confirmation dialog, with a success toast.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Delete button (currently a disabled "Coming soon" stub) in the drawer's action bar becomes functional
+- Clicking Delete opens a shadcn `AlertDialog` confirmation (title/description warning the action can't be undone, Cancel + destructive Confirm actions), matching the pattern already used by `DeleteAccountDialog`
+- Cancel dismisses the dialog with no changes
+- Confirming deletes the item via a Server Action, closes the drawer, and shows a success toast
+- The underlying card list (dashboard or `/items/[type]`) reflects the deletion after confirming (`router.refresh()`)
+- On failure (e.g. item already gone), show an error toast and leave the drawer open
 
 ## Notes
 <!-- Any extra notes -->
-
+- New `deleteItem(itemId)` Server Action in `src/actions/items.ts`, following the existing `{ success, error }` pattern: gets session via `auth()`, ownership-scoped delete, no request body to validate so no Zod schema needed
+- New `deleteItem` query function in `src/lib/db/items.ts`, ownership-scoped (e.g. `deleteMany({ where: { id, userId } })` or `findFirst` + `delete`, matching the ownership-check style already used by `getItemDetail`/`updateItem`)
+- Confirmation UI reuses the existing `alert-dialog` shadcn component already installed for `DeleteAccountDialog`
+- Wire into `ItemDrawer`'s existing Delete button/action-bar area alongside the Edit-mode work from the prior feature
 ## History
 <!-- Keep this updated. Earliest to latest -->
 - 2026-07-04 - Initial Next.js and Tailwind setup committed (`chore: initial next.js and tailwind setup`) and pushed to `origin/master` at https://github.com/Eddyson2214/devstash.git.
