@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { typeHref } from "@/lib/type-icons";
 
 // Stand-in until auth sessions are wired up; single demo user for now.
 const DEMO_USER_EMAIL = "demo@devstash.io";
@@ -97,6 +98,26 @@ export async function getItemStats(): Promise<ItemStats> {
   ]);
 
   return { total, favorites };
+}
+
+export async function getItemTypeBySlug(slug: string): Promise<DashboardItemType | null> {
+  const itemTypes = await prisma.itemType.findMany({ where: { isSystem: true } });
+  const itemType = itemTypes.find((type) => typeHref(type.name) === `/items/${slug}`);
+
+  return itemType ?? null;
+}
+
+export async function getItemsByType(itemTypeId: string): Promise<DashboardItem[]> {
+  const user = await getDemoUser();
+  if (!user) return [];
+
+  const items = await prisma.item.findMany({
+    where: { userId: user.id, itemTypeId },
+    orderBy: { createdAt: "desc" },
+    include: { itemType: true, tags: true },
+  });
+
+  return items.map(toDashboardItem);
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {

@@ -1,15 +1,26 @@
-# Current Feature
+# Current Feature: Items List View
 <!--Feature name and short description -->
+Dynamic items listing page at `/items/[type]` that displays type-filtered items.
 
 ## Status
 
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Create dynamic route `/items/[type]` (e.g., `/items/snippets`, `/items/notes`)
+- Fetch and display items filtered by type
+- Responsive grid of `ItemCard` components
+- Two columns on medium and up
+- Each card has a left border colored by item type
+- Follow existing codebase patterns
 
 ## Notes
 <!-- Any extra notes -->
+- Source spec: `context/features/item-list-view-spec.md`
+- Current `/items/[type]/page.tsx` is a placeholder backed by `mock-data.ts` (prints only the type name) — needs to move to real Prisma-backed data.
+- See `docs/item-crud-architecture.md` for the proposed unified design (route slug resolution via `typeHref()`, shared `ItemGrid`/`ItemCard` components, queries in `lib/db/items.ts`) and `docs/item-types.md` for per-type icon/color/field reference.
+- Existing card pattern to follow: `src/components/dashboard/ItemList.tsx` (left border + icon wash tinted by `itemType.color`, per-item pin/favorite/tags/date) — this feature is the type-filtered counterpart, likely as a new `ItemGrid`/`ItemCard` per the architecture doc rather than reusing `ItemList` directly since this spec asks for a responsive grid, not a stacked list.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
