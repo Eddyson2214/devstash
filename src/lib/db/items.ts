@@ -1,3 +1,4 @@
+import type { ContentType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { typeHref } from "@/lib/type-icons";
 
@@ -216,6 +217,38 @@ export async function updateItem(
       language: data.language,
       tags: {
         set: [],
+        connectOrCreate: data.tags.map((name) => ({ where: { name }, create: { name } })),
+      },
+    },
+    include: { itemType: true, tags: true, collections: { include: { collection: true } } },
+  });
+
+  return toItemDetail(item);
+}
+
+export interface CreateItemData {
+  title: string;
+  description: string | null;
+  content: string | null;
+  contentType: ContentType;
+  url: string | null;
+  language: string | null;
+  tags: string[];
+  itemTypeId: string;
+}
+
+export async function createItem(userId: string, data: CreateItemData): Promise<ItemDetail> {
+  const item = await prisma.item.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      contentType: data.contentType,
+      url: data.url,
+      language: data.language,
+      userId,
+      itemTypeId: data.itemTypeId,
+      tags: {
         connectOrCreate: data.tags.map((name) => ({ where: { name }, create: { name } })),
       },
     },

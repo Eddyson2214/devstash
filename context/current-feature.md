@@ -1,14 +1,26 @@
-# Current Feature
+# Current Feature: Item Create
 <!--Feature name and short description -->
+"New Item" button in the top bar opens a shadcn Dialog to create a new item, with fields shown per selected type.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- "New Item" button in `Topbar` (currently a non-functional placeholder) opens a shadcn `Dialog`
+- Type selector for snippet, prompt, command, note, link (file/image excluded — Pro-only, deferred per monetization spec)
+- Fields shown based on selected type:
+  - All types: title (required), description, tags
+  - snippet/command: content, language
+  - prompt/note: content
+  - link: URL (required)
+- Toast on success; modal closes and the underlying page refreshes to show the new item
 
 ## Notes
 <!-- Any extra notes -->
+- New `createItem` Server Action (likely `src/actions/items.ts`, alongside the existing `updateItem`/`deleteItem`), Zod-validated
+- New `createItem` query function in `src/lib/db/items.ts`, following the ownership/mapping conventions already used by `getItemDetail`/`updateItem`/`deleteItem`
+- `Topbar` is shared shell between `/dashboard` and `/items/[type]` — dialog needs to work from both; on `/items/[type]` the type selector could default to the current type
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

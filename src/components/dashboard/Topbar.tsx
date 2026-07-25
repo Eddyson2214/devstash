@@ -1,10 +1,15 @@
-import { Plus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import type { CreatableItemType } from "@/actions/items";
+import { NewItemDialog } from "@/components/items/NewItemDialog";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export function Topbar() {
+interface TopbarProps {
+  defaultItemType?: CreatableItemType;
+}
+
+export function Topbar({ defaultItemType }: TopbarProps) {
   return (
     <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border px-6">
       <SidebarTrigger />
@@ -23,10 +28,7 @@ export function Topbar() {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
-        <Button>
-          <Plus className="size-4" aria-hidden="true" />
-          New Item
-        </Button>
+        <NewItemDialog defaultType={defaultItemType} />
       </div>
     </header>
   );

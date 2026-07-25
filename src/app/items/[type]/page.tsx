@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import type { CreatableItemType } from "@/actions/items";
 import { auth } from "@/auth";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
@@ -13,6 +14,7 @@ import { TYPE_ICONS } from "@/lib/type-icons";
 export const dynamic = "force-dynamic";
 
 const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
+const CREATABLE_TYPE_NAMES = new Set(["Snippet", "Prompt", "Command", "Note", "Link"]);
 
 export default async function ItemTypePage({
   params,
@@ -35,6 +37,9 @@ export default async function ItemTypePage({
   ]);
 
   const Icon = TYPE_ICONS[itemType.icon];
+  const defaultItemType = CREATABLE_TYPE_NAMES.has(itemType.name)
+    ? (itemType.name.toLowerCase() as CreatableItemType)
+    : undefined;
 
   return (
     <ItemDrawerProvider>
@@ -50,7 +55,7 @@ export default async function ItemTypePage({
           }}
         />
         <SidebarInset>
-          <Topbar />
+          <Topbar defaultItemType={defaultItemType} />
           <main className="flex flex-1 flex-col gap-8 p-6">
             <div className="flex items-center gap-3">
               <div
