@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
 import { CodeEditor } from "@/components/items/CodeEditor";
+import { FileUpload, type UploadedFile } from "@/components/items/FileUpload";
 import { MarkdownEditor } from "@/components/items/MarkdownEditor";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,12 +44,15 @@ const ITEM_TYPE_OPTIONS: ItemTypeOption[] = [
   { value: "prompt", label: "Prompt", icon: TYPE_ICONS.Sparkles, color: "#8b5cf6" },
   { value: "command", label: "Command", icon: TYPE_ICONS.Terminal, color: "#f97316" },
   { value: "note", label: "Note", icon: TYPE_ICONS.StickyNote, color: "#fde047" },
+  { value: "file", label: "File", icon: TYPE_ICONS.File, color: "#6b7280" },
+  { value: "image", label: "Image", icon: TYPE_ICONS.Image, color: "#ec4899" },
   { value: "link", label: "Link", icon: TYPE_ICONS.Link, color: "#10b981" },
 ];
 
 const CONTENT_TYPES = new Set<CreatableItemType>(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPES = new Set<CreatableItemType>(["snippet", "command"]);
 const URL_TYPES = new Set<CreatableItemType>(["link"]);
+const FILE_TYPES = new Set<CreatableItemType>(["file", "image"]);
 
 interface FormState {
   type: CreatableItemType;
@@ -57,6 +61,7 @@ interface FormState {
   content: string;
   url: string;
   language: string;
+  file: UploadedFile | null;
   tagsInput: string;
 }
 
@@ -68,6 +73,7 @@ function emptyForm(defaultType: CreatableItemType): FormState {
     content: "",
     url: "",
     language: "",
+    file: null,
     tagsInput: "",
   };
 }
@@ -89,7 +95,11 @@ export function NewItemDialog({
   const showsContent = CONTENT_TYPES.has(form.type);
   const showsLanguage = LANGUAGE_TYPES.has(form.type);
   const showsUrl = URL_TYPES.has(form.type);
-  const canSubmit = form.title.trim().length > 0 && (!showsUrl || form.url.trim().length > 0);
+  const showsFile = FILE_TYPES.has(form.type);
+  const canSubmit =
+    form.title.trim().length > 0 &&
+    (!showsUrl || form.url.trim().length > 0) &&
+    (!showsFile || form.file !== null);
 
   function handleOpenChange(next: boolean) {
     if (next) setForm(emptyForm(defaultType));
@@ -111,6 +121,9 @@ export function NewItemDialog({
       content: showsContent ? form.content || null : null,
       url: showsUrl ? form.url.trim() || null : null,
       language: showsLanguage ? form.language.trim() || null : null,
+      fileUrl: showsFile ? (form.file?.fileUrl ?? null) : null,
+      fileName: showsFile ? (form.file?.fileName ?? null) : null,
+      fileSize: showsFile ? (form.file?.fileSize ?? null) : null,
       tags,
     });
 
@@ -202,6 +215,17 @@ export function NewItemDialog({
                 type="url"
                 value={form.url}
                 onChange={(event) => setForm({ ...form, url: event.target.value })}
+              />
+            </div>
+          )}
+
+          {showsFile && (
+            <div className="flex flex-col gap-1.5">
+              <Label>{form.type === "image" ? "Image" : "File"}</Label>
+              <FileUpload
+                category={form.type as "file" | "image"}
+                value={form.file}
+                onChange={(file) => setForm({ ...form, file })}
               />
             </div>
           )}

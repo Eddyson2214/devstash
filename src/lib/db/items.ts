@@ -46,6 +46,7 @@ export interface ItemDetail {
   language: string | null;
   fileUrl: string | null;
   fileName: string | null;
+  fileSize: number | null;
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
@@ -150,6 +151,7 @@ function toItemDetail(item: {
   language: string | null;
   fileUrl: string | null;
   fileName: string | null;
+  fileSize: number | null;
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
@@ -168,6 +170,7 @@ function toItemDetail(item: {
     language: item.language,
     fileUrl: item.fileUrl,
     fileName: item.fileName,
+    fileSize: item.fileSize,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     createdAt: item.createdAt,
@@ -233,6 +236,9 @@ export interface CreateItemData {
   contentType: ContentType;
   url: string | null;
   language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   tags: string[];
   itemTypeId: string;
 }
@@ -246,6 +252,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       contentType: data.contentType,
       url: data.url,
       language: data.language,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+      fileSize: data.fileSize,
       userId,
       itemTypeId: data.itemTypeId,
       tags: {
@@ -258,9 +267,18 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
   return toItemDetail(item);
 }
 
-export async function deleteItem(id: string, userId: string): Promise<boolean> {
-  const { count } = await prisma.item.deleteMany({ where: { id, userId } });
-  return count > 0;
+export async function deleteItem(
+  id: string,
+  userId: string
+): Promise<{ fileUrl: string | null } | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { id: true, fileUrl: true },
+  });
+  if (!existing) return null;
+
+  await prisma.item.delete({ where: { id: existing.id } });
+  return { fileUrl: existing.fileUrl };
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {

@@ -11,6 +11,11 @@ vi.mock("@/lib/db/items", () => ({
   getItemTypeBySlug: vi.fn(),
 }));
 
+vi.mock("@/lib/r2", () => ({
+  deleteFromR2: vi.fn(),
+  keyFromFileUrl: vi.fn((fileUrl: string) => new URL(fileUrl).pathname.replace(/^\/+/, "")),
+}));
+
 import { auth } from "@/auth";
 import {
   createItem as createItemQuery,
@@ -18,6 +23,7 @@ import {
   getItemTypeBySlug,
   updateItem as updateItemQuery,
 } from "@/lib/db/items";
+import { deleteFromR2 } from "@/lib/r2";
 import { createItem, deleteItem, updateItem } from "@/actions/items";
 
 const mockedAuth = vi.mocked(auth);
@@ -25,6 +31,7 @@ const mockedUpdateItemQuery = vi.mocked(updateItemQuery);
 const mockedDeleteItemQuery = vi.mocked(deleteItemQuery);
 const mockedCreateItemQuery = vi.mocked(createItemQuery);
 const mockedGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
+const mockedDeleteFromR2 = vi.mocked(deleteFromR2);
 
 const validInput = {
   title: "Updated title",
@@ -108,22 +115,37 @@ describe("deleteItem", () => {
   it("returns an error when the item doesn't exist or isn't owned by the session user", async () => {
     // @ts-expect-error - minimal mock, only the fields the action reads
     mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
-    mockedDeleteItemQuery.mockResolvedValue(false);
+    mockedDeleteItemQuery.mockResolvedValue(null);
 
     const result = await deleteItem("item-1");
 
     expect(result).toEqual({ success: false, error: "Item not found" });
+    expect(mockedDeleteFromR2).not.toHaveBeenCalled();
   });
 
-  it("deletes the item on success", async () => {
+  it("deletes the item on success and skips R2 cleanup when there was no file", async () => {
     // @ts-expect-error - minimal mock, only the fields the action reads
     mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
-    mockedDeleteItemQuery.mockResolvedValue(true);
+    mockedDeleteItemQuery.mockResolvedValue({ fileUrl: null });
 
     const result = await deleteItem("item-1");
 
     expect(result).toEqual({ success: true });
     expect(mockedDeleteItemQuery).toHaveBeenCalledWith("item-1", "user-1");
+    expect(mockedDeleteFromR2).not.toHaveBeenCalled();
+  });
+
+  it("deletes the R2 object when the item had an uploaded file", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedDeleteItemQuery.mockResolvedValue({
+      fileUrl: "https://pub-example.r2.dev/user-1/abc-notes.pdf",
+    });
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: true });
+    expect(mockedDeleteFromR2).toHaveBeenCalledWith("user-1/abc-notes.pdf");
   });
 });
 
@@ -134,6 +156,9 @@ const validCreateInput = {
   content: "console.log('hi')",
   url: null,
   language: "typescript",
+  fileUrl: null,
+  fileName: null,
+  fileSize: null,
   tags: ["react"],
 };
 
@@ -199,6 +224,9 @@ describe("createItem", () => {
       contentType: "TEXT",
       url: null,
       language: "typescript",
+      fileUrl: null,
+      fileName: null,
+      fileSize: null,
       tags: ["react"],
       itemTypeId: "type-1",
     });
@@ -224,6 +252,52 @@ describe("createItem", () => {
     expect(mockedCreateItemQuery).toHaveBeenCalledWith(
       "user-1",
       expect.objectContaining({ contentType: "URL", url: "https://example.com" })
+    );
+  });
+
+  it("rejects a file item with no uploaded file", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+
+    const result = await createItem({
+      ...validCreateInput,
+      type: "file",
+      content: null,
+      language: null,
+      fileUrl: null,
+    });
+
+    expect(result).toEqual({ success: false, error: "A file is required" });
+    expect(mockedCreateItemQuery).not.toHaveBeenCalled();
+  });
+
+  it("uses FILE content type for image items and passes through the upload fields", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedGetItemTypeBySlug.mockResolvedValue({ id: "type-3", name: "Image" });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedCreateItemQuery.mockResolvedValue({ id: "item-3" });
+
+    await createItem({
+      ...validCreateInput,
+      type: "image",
+      content: null,
+      language: null,
+      fileUrl: "https://pub-example.r2.dev/user-1/abc-photo.png",
+      fileName: "photo.png",
+      fileSize: 2048,
+    });
+
+    expect(mockedGetItemTypeBySlug).toHaveBeenCalledWith("images");
+    expect(mockedCreateItemQuery).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        contentType: "FILE",
+        fileUrl: "https://pub-example.r2.dev/user-1/abc-photo.png",
+        fileName: "photo.png",
+        fileSize: 2048,
+      })
     );
   });
 });

@@ -10,8 +10,18 @@ import {
   updateItem as updateItemQuery,
   type ItemDetail,
 } from "@/lib/db/items";
+import { deleteFromR2, keyFromFileUrl } from "@/lib/r2";
 
-const CREATABLE_ITEM_TYPES = ["snippet", "prompt", "command", "note", "link"] as const;
+const CREATABLE_ITEM_TYPES = [
+  "snippet",
+  "prompt",
+  "command",
+  "note",
+  "link",
+  "file",
+  "image",
+] as const;
+const FILE_ITEM_TYPES = new Set(["file", "image"]);
 
 const createItemSchema = z
   .object({
@@ -21,11 +31,18 @@ const createItemSchema = z
     content: z.string().min(1).nullable(),
     url: z.string().trim().url("Enter a valid URL").nullable(),
     language: z.string().trim().min(1).nullable(),
+    fileUrl: z.string().trim().url().nullable(),
+    fileName: z.string().trim().min(1).nullable(),
+    fileSize: z.number().int().positive().nullable(),
     tags: z.array(z.string().trim().min(1)),
   })
   .refine((data) => data.type !== "link" || data.url !== null, {
     message: "URL is required",
     path: ["url"],
+  })
+  .refine((data) => !FILE_ITEM_TYPES.has(data.type) || data.fileUrl !== null, {
+    message: "A file is required",
+    path: ["fileUrl"],
   });
 
 export type CreateItemInput = z.infer<typeof createItemSchema>;
@@ -53,9 +70,12 @@ export async function createItem(
     title: parsed.data.title,
     description: parsed.data.description,
     content: parsed.data.content,
-    contentType: parsed.data.type === "link" ? "URL" : "TEXT",
+    contentType: parsed.data.type === "link" ? "URL" : FILE_ITEM_TYPES.has(parsed.data.type) ? "FILE" : "TEXT",
     url: parsed.data.url,
     language: parsed.data.language,
+    fileUrl: parsed.data.fileUrl,
+    fileName: parsed.data.fileName,
+    fileSize: parsed.data.fileSize,
     tags: parsed.data.tags,
     itemTypeId: itemType.id,
   });
@@ -107,6 +127,10 @@ export async function deleteItem(
   const deleted = await deleteItemQuery(itemId, session.user.id);
   if (!deleted) {
     return { success: false, error: "Item not found" };
+  }
+
+  if (deleted.fileUrl) {
+    await deleteFromR2(keyFromFileUrl(deleted.fileUrl));
   }
 
   return { success: true };
