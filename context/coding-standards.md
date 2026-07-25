@@ -46,6 +46,7 @@ Example v4 configuration:
 @theme {
   --color-primary: oklch(50% 0.2 250);
 }
+```
 
 ## File Organization
 
@@ -89,9 +90,21 @@ Example v4 configuration:
 - Return `{ success, data, error }` pattern from actions
 - Display user-friendly error messages via toast
 
+## Testing
+
+- **Vitest**, run via `npm run test` (single run), `npm run test:watch`, or `npm run test:coverage`
+- Scope: unit test **Server Actions** (`src/actions/*.ts`) and **utilities** (`src/lib/**/*.ts`) only — no component testing
+- Test files are colocated with the source file: `src/lib/foo.ts` → `src/lib/foo.test.ts`
+- `vitest.config.ts` runs in the `node` environment with tsconfig path aliases (`@/*`) resolved — no DOM, no React plugin
+- Mock module boundaries with `vi.mock(...)`, not real I/O:
+  - `@/lib/prisma` — mock the `prisma` client rather than hitting Neon
+  - `@/auth` — mock `auth`/`signIn`/`signOut` rather than exercising NextAuth
+  - External services (Resend, Upstash) — mock rather than calling out
+- Pure utilities (no external deps, e.g. `src/lib/auth-errors.ts`) need no mocking
+- See `src/lib/auth-errors.test.ts` (pure utility) and `src/actions/profile.test.ts` (mocked Server Action) for the reference pattern
+
 ## Code Quality
 
 - No commented-out code unless specified
 - No unused imports or variables
 - Keep functions under 50 lines when possible
-```
