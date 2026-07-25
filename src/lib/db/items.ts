@@ -139,14 +139,24 @@ export async function getItemsByType(itemTypeId: string): Promise<DashboardItem[
   return items.map(toDashboardItem);
 }
 
-export async function getItemDetail(id: string, userId: string): Promise<ItemDetail | null> {
-  const item = await prisma.item.findFirst({
-    where: { id, userId },
-    include: { itemType: true, tags: true, collections: { include: { collection: true } } },
-  });
-
-  if (!item) return null;
-
+function toItemDetail(item: {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  contentType: string;
+  url: string | null;
+  language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  itemType: DashboardItemType;
+  tags: { name: string }[];
+  collections: { collection: { id: string; name: string } }[];
+}): ItemDetail {
   return {
     id: item.id,
     title: item.title,
@@ -168,6 +178,51 @@ export async function getItemDetail(id: string, userId: string): Promise<ItemDet
       name: collection.name,
     })),
   };
+}
+
+export async function getItemDetail(id: string, userId: string): Promise<ItemDetail | null> {
+  const item = await prisma.item.findFirst({
+    where: { id, userId },
+    include: { itemType: true, tags: true, collections: { include: { collection: true } } },
+  });
+
+  return item ? toItemDetail(item) : null;
+}
+
+export interface UpdateItemData {
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  tags: string[];
+}
+
+export async function updateItem(
+  id: string,
+  userId: string,
+  data: UpdateItemData
+): Promise<ItemDetail | null> {
+  const existing = await prisma.item.findFirst({ where: { id, userId } });
+  if (!existing) return null;
+
+  const item = await prisma.item.update({
+    where: { id },
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      tags: {
+        set: [],
+        connectOrCreate: data.tags.map((name) => ({ where: { name }, create: { name } })),
+      },
+    },
+    include: { itemType: true, tags: true, collections: { include: { collection: true } } },
+  });
+
+  return toItemDetail(item);
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {

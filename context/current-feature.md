@@ -1,15 +1,26 @@
-# Current Feature
+# Current Feature: Item Drawer — Edit Mode
 <!--Feature name and short description -->
+Clicking Edit in the item drawer's action bar switches the same drawer into an inline edit mode instead of navigating away.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Edit button toggles the open drawer into edit mode; action bar is replaced with Save/Cancel
+- Cancel discards changes and returns to view mode; Save persists via server action, returns to view mode, and refreshes the drawer data, with a toast on success or error
+- Editable for all types: Title (required text input), Description (optional textarea), Tags (comma-separated input → tag array)
+- Editable per type: Content (textarea) for snippet/prompt/command/note; Language (text input) for snippet/command; URL (text input) for link
+- Non-editable in edit mode (display only): item type, collections, created/updated dates
+- Client-side guard: disable Save when title is empty
+- After save, call `router.refresh()` so the underlying card list reflects changes
 
 ## Notes
 <!-- Any extra notes -->
-
+- New `updateItem(itemId, data)` Server Action in `src/actions/items.ts`, following the `{ success, data, error }` pattern: validates input with Zod, gets session via `auth()`, validates ownership, calls the query function
+- Zod schema: `title` non-empty trimmed string; `description`/`content`/`url`/`language` optional string-or-null; `tags` array of trimmed non-empty strings; Zod errors returned in `{ success: false, error }`
+- New `updateItem` query function in `src/lib/db/items.ts`; tag handling on update is disconnect-all-then-connect-or-create; returns the updated `ItemDetail` so the drawer can refresh without a second fetch
+- No form library — controlled inputs with local state; the content textarea is plain (no code editor yet)
 ## History
 <!-- Keep this updated. Earliest to latest -->
 - 2026-07-04 - Initial Next.js and Tailwind setup committed (`chore: initial next.js and tailwind setup`) and pushed to `origin/master` at https://github.com/Eddyson2214/devstash.git.
