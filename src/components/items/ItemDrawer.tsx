@@ -6,6 +6,7 @@ import { Copy, Pencil, Pin, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
+import { CodeEditor } from "@/components/items/CodeEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -299,13 +300,28 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
 
                   {showsContent && (
                     <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="item-content">Content</Label>
-                      <Textarea
-                        id="item-content"
-                        className="min-h-32 font-mono text-xs"
-                        value={form.content}
-                        onChange={(event) => setForm({ ...form, content: event.target.value })}
-                      />
+                      {showsLanguage ? (
+                        <>
+                          <Label>Content</Label>
+                          <CodeEditor
+                            value={form.content}
+                            onChange={(next) => setForm({ ...form, content: next })}
+                            language={form.language || null}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <Label htmlFor="item-content">Content</Label>
+                          <Textarea
+                            id="item-content"
+                            className="min-h-32 font-mono text-xs"
+                            value={form.content}
+                            onChange={(event) =>
+                              setForm({ ...form, content: event.target.value })
+                            }
+                          />
+                        </>
+                      )}
                     </div>
                   )}
 
@@ -373,9 +389,13 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                         <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                           Content
                         </h4>
-                        <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">
-                          <code>{item.content}</code>
-                        </pre>
+                        {showsLanguage ? (
+                          <CodeEditor value={item.content} language={item.language} readOnly />
+                        ) : (
+                          <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">
+                            <code>{item.content}</code>
+                          </pre>
+                        )}
                       </section>
                     )
                   )}

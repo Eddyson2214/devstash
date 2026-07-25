@@ -127,3 +127,12 @@
     @apply font-sans;
     }
 }
+
+.devstash-code-editor .monaco-scrollable-element > .scrollbar > .slider {
+  border-radius: 9999px;
+  background: rgba(212, 212, 216, 0.25) !important;
+}
+
+.devstash-code-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: rgba(212, 212, 216, 0.4) !important;
+}

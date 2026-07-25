@@ -6,6 +6,7 @@ import { Plus, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
+import { CodeEditor } from "@/components/items/CodeEditor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -202,13 +203,26 @@ export function NewItemDialog({ defaultType = "snippet" }: NewItemDialogProps) {
 
           {showsContent && (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="new-item-content">Content</Label>
-              <Textarea
-                id="new-item-content"
-                className="min-h-32 font-mono text-xs"
-                value={form.content}
-                onChange={(event) => setForm({ ...form, content: event.target.value })}
-              />
+              {showsLanguage ? (
+                <>
+                  <Label>Content</Label>
+                  <CodeEditor
+                    value={form.content}
+                    onChange={(next) => setForm({ ...form, content: next })}
+                    language={form.language || null}
+                  />
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="new-item-content">Content</Label>
+                  <Textarea
+                    id="new-item-content"
+                    className="min-h-32 font-mono text-xs"
+                    value={form.content}
+                    onChange={(event) => setForm({ ...form, content: event.target.value })}
+                  />
+                </>
+              )}
             </div>
           )}
 
