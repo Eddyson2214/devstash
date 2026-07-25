@@ -1,14 +1,22 @@
-# Current Feature
+# Current Feature: Add Copy Icon to Item Cards
 <!--Feature name and short description -->
+Add a quick copy icon/button directly on `ItemCard` so users can copy an item's content/URL without opening the drawer first.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Add a copy icon/button to `ItemCard` (`src/components/items/ItemCard.tsx`), clickable without opening the drawer (`event.stopPropagation()` on click, matching the pattern already used by `FileListRow`'s Download button).
+- Clicking it copies the item's relevant text via `navigator.clipboard.writeText`, reusing the same approach/toast already implemented in `ItemDrawer`'s Copy action.
+- What gets copied depends on type: `content` for snippet/prompt/command/note, `url` for link.
 
 ## Notes
 <!-- Any extra notes -->
+- Open question: `DashboardItem` (what `ItemCard`/`ItemGrid` receive) does not currently include `content`, `contentType`, or `url` — only `ItemDetail` (fetched per-item via `GET /api/items/[id]` when the drawer opens) has those. Need to decide between (a) extending `getItemsByType`/`toDashboardItem` in `src/lib/db/items.ts` to include `content`/`url` so cards can copy client-side with no extra fetch, or (b) fetching on-demand when the copy icon is clicked. (a) avoids a network request per click since items are already loaded in the list.
+- `FileListRow`/`ImageThumbnailCard` are separate components for File/Image types with their own Download action — those types have no obvious "copy" target, so this feature is scoped to `ItemCard` (snippet/prompt/command/note/link) unless told otherwise.
+- Icon choice: reuse the `Copy` icon from `lucide-react`, matching the drawer's existing copy icon, for visual consistency.
+- Placement/visibility (always visible vs. hover-only) not yet decided — default to always visible near the pin/favorite indicators unless amended before `/feature start`.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

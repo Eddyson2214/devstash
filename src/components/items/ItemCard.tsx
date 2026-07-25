@@ -1,8 +1,11 @@
 "use client";
 
-import { Pin, Star } from "lucide-react";
+import type { MouseEvent } from "react";
+import { Copy, Pin, Star } from "lucide-react";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useItemDrawer } from "@/components/items/ItemDrawerProvider";
 import type { DashboardItem } from "@/lib/db/items";
@@ -23,6 +26,15 @@ interface ItemCardProps {
 export function ItemCard({ item }: ItemCardProps) {
   const Icon = TYPE_ICONS[item.itemType.icon];
   const { openItemDrawer } = useItemDrawer();
+  const copyText = item.content ?? item.url ?? "";
+
+  async function handleCopy(event: MouseEvent) {
+    event.stopPropagation();
+    if (!copyText) return;
+
+    await navigator.clipboard.writeText(copyText);
+    toast.success("Copied to clipboard");
+  }
 
   return (
     <Card
@@ -49,6 +61,12 @@ export function ItemCard({ item }: ItemCardProps) {
             )}
           </div>
           <div className="flex items-center gap-1.5">
+            {copyText && (
+              <Button variant="ghost" size="icon-sm" onClick={handleCopy}>
+                <Copy className="size-3.5" aria-hidden="true" />
+                <span className="sr-only">Copy {item.title}</span>
+              </Button>
+            )}
             {item.isPinned && <Pin className="size-3.5 text-muted-foreground" aria-hidden="true" />}
             {item.isFavorite && (
               <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
