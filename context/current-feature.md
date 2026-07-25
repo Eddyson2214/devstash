@@ -1,14 +1,20 @@
-# Current Feature
+# Current Feature: New Item Type Select Styling
 <!--Feature name and short description -->
+Polish the Type select in the New Item dialog: a icon tag next to each type option, and a trigger that sizes to the selected value instead of stretching full width.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- In `NewItemDialog`'s Type select, each option (snippet/prompt/command/note/link) shows the icons of each of them , both in the dropdown list and next to the currently selected value in the trigger
+- The select trigger auto-sizes to fit the selected value's content instead of stretching full width, so it visibly shrinks/grows depending on which type is currently selected
 
 ## Notes
 <!-- Any extra notes -->
+- Research in the project the icons for each type (snippet/prompt/command/note/link) as navigation is already.
+- Purely a `src/components/items/NewItemDialog.tsx` visual change — no server/data changes
+- The trigger currently has an explicit `className="w-full"` override on `SelectTrigger` — removing it restores the shadcn default (`w-fit`), which is what makes it respond to the selected value's width
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

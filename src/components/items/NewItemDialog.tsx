@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
+import { Plus, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
@@ -27,13 +27,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { TYPE_ICONS } from "@/lib/type-icons";
 
-const ITEM_TYPE_OPTIONS: { value: CreatableItemType; label: string }[] = [
-  { value: "snippet", label: "Snippet" },
-  { value: "prompt", label: "Prompt" },
-  { value: "command", label: "Command" },
-  { value: "note", label: "Note" },
-  { value: "link", label: "Link" },
+interface ItemTypeOption {
+  value: CreatableItemType;
+  label: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+const ITEM_TYPE_OPTIONS: ItemTypeOption[] = [
+  { value: "snippet", label: "Snippet", icon: TYPE_ICONS.Code, color: "#3b82f6" },
+  { value: "prompt", label: "Prompt", icon: TYPE_ICONS.Sparkles, color: "#8b5cf6" },
+  { value: "command", label: "Command", icon: TYPE_ICONS.Terminal, color: "#f97316" },
+  { value: "note", label: "Note", icon: TYPE_ICONS.StickyNote, color: "#fde047" },
+  { value: "link", label: "Link", icon: TYPE_ICONS.Link, color: "#10b981" },
 ];
 
 const CONTENT_TYPES = new Set<CreatableItemType>(["snippet", "prompt", "command", "note"]);
@@ -133,15 +141,31 @@ export function NewItemDialog({ defaultType = "snippet" }: NewItemDialogProps) {
               value={form.type}
               onValueChange={(value) => setForm({ ...form, type: value as CreatableItemType })}
             >
-              <SelectTrigger id="new-item-type" className="w-full">
-                <SelectValue />
+              <SelectTrigger id="new-item-type">
+                <SelectValue>
+                  {(value: CreatableItemType | null) => {
+                    const option = ITEM_TYPE_OPTIONS.find((item) => item.value === value);
+                    if (!option) return null;
+                    const Icon = option.icon;
+                    return (
+                      <>
+                        <Icon className="size-4" style={{ color: option.color }} aria-hidden="true" />
+                        {option.label}
+                      </>
+                    );
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {ITEM_TYPE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {ITEM_TYPE_OPTIONS.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <SelectItem key={option.value} value={option.value}>
+                      <Icon className="size-4" style={{ color: option.color }} aria-hidden="true" />
+                      {option.label}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
