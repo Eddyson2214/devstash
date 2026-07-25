@@ -1,14 +1,23 @@
-# Current Feature
-<!--Feature name and short description -->
+# Current Feature: File List View
+
+Update `/items/files` to display as a single-column list (like Google Drive/Dropbox) instead of grid cards.
 
 ## Status
 
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- Single-column list layout with rows (replacing the grid card layout, only on `/items/files`)
+- Each row shows: file icon (by extension), file name, file size, upload date, download button
+- Row hover highlight
+- Click row opens `ItemDrawer` (matching existing card/list-row click behavior elsewhere in the app)
+- Download button triggers a direct download and stops propagation (so it doesn't also open the drawer)
+- Responsive: stack row info vertically on mobile
 
 ## Notes
-<!-- Any extra notes -->
+- Scope is `/items/files` only — other item types keep their existing `ItemGrid` card layout (`/items/images` included, per the spec's explicit `/items/files` scoping).
+- Existing `GET /api/download/[id]` proxy route (from the File Upload with Cloudflare R2 feature) can be reused for the row's download button.
+- Spec file: `context/features/file-display-spec.md`
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

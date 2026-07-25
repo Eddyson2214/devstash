@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { FileList } from "@/components/items/FileList";
 import { ItemDrawerProvider } from "@/components/items/ItemDrawerProvider";
 import { ItemGrid } from "@/components/items/ItemGrid";
 import { NewItemDialog } from "@/components/items/NewItemDialog";
@@ -96,18 +97,33 @@ export default async function ItemTypePage({
               )}
             </div>
 
-            <ItemGrid
-              items={items}
-              emptyMessage={`No ${itemType.name.toLowerCase()}s yet.`}
-              emptyAction={
-                defaultItemType && (
-                  <NewItemDialog
-                    defaultType={defaultItemType}
-                    triggerLabel={`New ${itemType.name}`}
-                  />
-                )
-              }
-            />
+            {itemType.name === "File" ? (
+              <FileList
+                items={items}
+                emptyMessage={`No ${itemType.name.toLowerCase()}s yet.`}
+                emptyAction={
+                  defaultItemType && (
+                    <NewItemDialog
+                      defaultType={defaultItemType}
+                      triggerLabel={`New ${itemType.name}`}
+                    />
+                  )
+                }
+              />
+            ) : (
+              <ItemGrid
+                items={items}
+                emptyMessage={`No ${itemType.name.toLowerCase()}s yet.`}
+                emptyAction={
+                  defaultItemType && (
+                    <NewItemDialog
+                      defaultType={defaultItemType}
+                      triggerLabel={`New ${itemType.name}`}
+                    />
+                  )
+                }
+              />
+            )}
           </main>
         </SidebarInset>
       </SidebarProvider>

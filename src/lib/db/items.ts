@@ -16,6 +16,8 @@ export interface DashboardItem {
   id: string;
   title: string;
   description: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
@@ -64,6 +66,8 @@ function toDashboardItem(item: {
   id: string;
   title: string;
   description: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   isFavorite: boolean;
   isPinned: boolean;
   createdAt: Date;
@@ -74,6 +78,8 @@ function toDashboardItem(item: {
     id: item.id,
     title: item.title,
     description: item.description,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
     isFavorite: item.isFavorite,
     isPinned: item.isPinned,
     createdAt: item.createdAt,
