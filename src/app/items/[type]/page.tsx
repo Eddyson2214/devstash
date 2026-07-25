@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { FileList } from "@/components/items/FileList";
+import { ImageGallery } from "@/components/items/ImageGallery";
 import { ItemDrawerProvider } from "@/components/items/ItemDrawerProvider";
 import { ItemGrid } from "@/components/items/ItemGrid";
 import { NewItemDialog } from "@/components/items/NewItemDialog";
@@ -97,33 +98,24 @@ export default async function ItemTypePage({
               )}
             </div>
 
-            {itemType.name === "File" ? (
-              <FileList
-                items={items}
-                emptyMessage={`No ${itemType.name.toLowerCase()}s yet.`}
-                emptyAction={
-                  defaultItemType && (
-                    <NewItemDialog
-                      defaultType={defaultItemType}
-                      triggerLabel={`New ${itemType.name}`}
-                    />
-                  )
-                }
-              />
-            ) : (
-              <ItemGrid
-                items={items}
-                emptyMessage={`No ${itemType.name.toLowerCase()}s yet.`}
-                emptyAction={
-                  defaultItemType && (
-                    <NewItemDialog
-                      defaultType={defaultItemType}
-                      triggerLabel={`New ${itemType.name}`}
-                    />
-                  )
-                }
-              />
-            )}
+            {(() => {
+              const emptyMessage = `No ${itemType.name.toLowerCase()}s yet.`;
+              const emptyAction = defaultItemType && (
+                <NewItemDialog defaultType={defaultItemType} triggerLabel={`New ${itemType.name}`} />
+              );
+
+              if (itemType.name === "File") {
+                return <FileList items={items} emptyMessage={emptyMessage} emptyAction={emptyAction} />;
+              }
+
+              if (itemType.name === "Image") {
+                return (
+                  <ImageGallery items={items} emptyMessage={emptyMessage} emptyAction={emptyAction} />
+                );
+              }
+
+              return <ItemGrid items={items} emptyMessage={emptyMessage} emptyAction={emptyAction} />;
+            })()}
           </main>
         </SidebarInset>
       </SidebarProvider>
