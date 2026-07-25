@@ -1,14 +1,23 @@
-# Current Feature
+# Current Feature: Type-Specific Add Button
 <!--Feature name and short description -->
+Add a button on each item type page (e.g. `/items/snippets`) that opens the New Item dialog preselected to that page's type.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Add a type-specific "New {Type}" button directly on each `/items/[type]` page (e.g. in the page header next to the "Snippets · 4 items" heading)
+- Opening it preselects the item type in the New Item dialog's Type select, matching the current page
+- Also show the same type-specific add action in the empty state (`No snippets yet.`) so there's a clear call-to-action when a type has zero items
+- File/Image type pages excluded from the button, since those types aren't creatable yet (Pro-only, per monetization spec)
 
 ## Notes
 <!-- Any extra notes -->
+- Preselecting the type already works today: `/items/[type]/page.tsx` computes `defaultItemType` from the page's `itemType.name` and passes it to `Topbar` → `NewItemDialog`, which seeds the `Select`'s initial value. That existing plumbing should be reused, not rebuilt.
+- Net-new part is the button's placement: today the only entry point is the single generic "New Item" button in the shared `Topbar` (present on both `/dashboard` and every `/items/[type]` page). This feature adds an additional, page-specific trigger; the Topbar's generic button should stay as-is (still useful for creating a different type without navigating away).
+- `NewItemDialog` currently hardcodes its own `DialogTrigger` (a `Button` labeled "New Item" with a `Plus` icon) — it isn't customizable, so it'll need a way to render a second instance with different trigger text (e.g. "New Snippet") without duplicating the dialog's form logic.
+- Open question to confirm before/at `/feature start`: should the empty-state CTA be a text link or a full button matching the header one? Defaulting to a button in the same style unless told otherwise.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

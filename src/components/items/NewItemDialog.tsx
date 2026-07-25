@@ -73,9 +73,13 @@ function emptyForm(defaultType: CreatableItemType): FormState {
 
 interface NewItemDialogProps {
   defaultType?: CreatableItemType;
+  triggerLabel?: string;
 }
 
-export function NewItemDialog({ defaultType = "snippet" }: NewItemDialogProps) {
+export function NewItemDialog({
+  defaultType = "snippet",
+  triggerLabel = "New Item",
+}: NewItemDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -125,7 +129,7 @@ export function NewItemDialog({ defaultType = "snippet" }: NewItemDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button />}>
         <Plus className="size-4" aria-hidden="true" />
-        New Item
+        {triggerLabel}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

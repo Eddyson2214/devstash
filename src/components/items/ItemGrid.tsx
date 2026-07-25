@@ -1,14 +1,22 @@
+import type { ReactNode } from "react";
+
 import { ItemCard } from "@/components/items/ItemCard";
 import type { DashboardItem } from "@/lib/db/items";
 
 interface ItemGridProps {
   items: DashboardItem[];
   emptyMessage: string;
+  emptyAction?: ReactNode;
 }
 
-export function ItemGrid({ items, emptyMessage }: ItemGridProps) {
+export function ItemGrid({ items, emptyMessage, emptyAction }: ItemGridProps) {
   if (items.length === 0) {
-    return <p className="text-sm text-muted-foreground">{emptyMessage}</p>;
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <p className="text-sm text-muted-foreground">{emptyMessage}</p>
+        {emptyAction}
+      </div>
+    );
   }
 
   return (
