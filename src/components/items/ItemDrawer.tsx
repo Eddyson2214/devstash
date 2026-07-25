@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Pencil, Pin, Star, Trash2 } from "lucide-react";
+import { Copy, Download, FileText, Pencil, Pin, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
@@ -27,6 +27,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
+import { formatFileSize } from "@/lib/file-upload";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
 type FetchedItemDetail = Omit<ItemDetail, "createdAt" | "updatedAt"> & {
@@ -47,6 +48,7 @@ interface EditFormState {
 const CONTENT_TYPE_NAMES = new Set(["Snippet", "Prompt", "Command", "Note"]);
 const LANGUAGE_TYPE_NAMES = new Set(["Snippet", "Command"]);
 const URL_TYPE_NAMES = new Set(["Link"]);
+const FILE_TYPE_NAMES = new Set(["File", "Image"]);
 
 function formatDate(date: string) {
   return new Date(date).toLocaleDateString("en-US", {
@@ -100,6 +102,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const showsContent = item ? CONTENT_TYPE_NAMES.has(item.itemType.name) : false;
   const showsLanguage = item ? LANGUAGE_TYPE_NAMES.has(item.itemType.name) : false;
   const showsUrl = item ? URL_TYPE_NAMES.has(item.itemType.name) : false;
+  const showsFile = item ? FILE_TYPE_NAMES.has(item.itemType.name) : false;
 
   async function handleCopy() {
     const text = item?.content ?? item?.url ?? "";
@@ -243,6 +246,17 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                     <Copy aria-hidden="true" />
                     Copy
                   </Button>
+                  {showsFile && item.fileUrl && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      nativeButton={false}
+                      render={<a href={`/api/download/${item.id}`} download={item.fileName ?? true} />}
+                    >
+                      <Download aria-hidden="true" />
+                      Download
+                    </Button>
+                  )}
                   <div className="ml-auto flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={startEdit}>
                       <Pencil aria-hidden="true" />
@@ -379,6 +393,34 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                       >
                         {item.url}
                       </a>
+                    </section>
+                  ) : showsFile && item.fileUrl ? (
+                    <section>
+                      <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                        {item.itemType.name === "Image" ? "Image" : "File"}
+                      </h4>
+                      {item.itemType.name === "Image" ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- remote R2 URL, not a local asset
+                        <img
+                          src={item.fileUrl}
+                          alt={item.fileName ?? item.title}
+                          className="max-h-72 w-full rounded-lg border border-border/60 bg-muted object-contain"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
+                          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
+                            <FileText className="size-5 text-muted-foreground" aria-hidden="true" />
+                          </div>
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-sm font-medium">{item.fileName}</span>
+                            {item.fileSize !== null && (
+                              <span className="text-xs text-muted-foreground">
+                                {formatFileSize(item.fileSize)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </section>
                   ) : (
                     item.content && (

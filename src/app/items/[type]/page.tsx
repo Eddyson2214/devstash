@@ -15,7 +15,15 @@ import { TYPE_ICONS } from "@/lib/type-icons";
 export const dynamic = "force-dynamic";
 
 const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
-const CREATABLE_TYPE_NAMES = new Set(["Snippet", "Prompt", "Command", "Note", "Link"]);
+const CREATABLE_TYPE_NAMES = new Set([
+  "Snippet",
+  "Prompt",
+  "Command",
+  "Note",
+  "Link",
+  "File",
+  "Image",
+]);
 
 export default async function ItemTypePage({
   params,
