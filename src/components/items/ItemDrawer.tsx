@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
 import { CodeEditor } from "@/components/items/CodeEditor";
+import { MarkdownEditor } from "@/components/items/MarkdownEditor";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -311,14 +312,10 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                         </>
                       ) : (
                         <>
-                          <Label htmlFor="item-content">Content</Label>
-                          <Textarea
-                            id="item-content"
-                            className="min-h-32 font-mono text-xs"
+                          <Label>Content</Label>
+                          <MarkdownEditor
                             value={form.content}
-                            onChange={(event) =>
-                              setForm({ ...form, content: event.target.value })
-                            }
+                            onChange={(next) => setForm({ ...form, content: next })}
                           />
                         </>
                       )}
@@ -392,9 +389,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                         {showsLanguage ? (
                           <CodeEditor value={item.content} language={item.language} readOnly />
                         ) : (
-                          <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">
-                            <code>{item.content}</code>
-                          </pre>
+                          <MarkdownEditor value={item.content} readOnly />
                         )}
                       </section>
                     )

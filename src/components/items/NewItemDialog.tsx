@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
 import { CodeEditor } from "@/components/items/CodeEditor";
+import { MarkdownEditor } from "@/components/items/MarkdownEditor";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -218,12 +219,10 @@ export function NewItemDialog({
                 </>
               ) : (
                 <>
-                  <Label htmlFor="new-item-content">Content</Label>
-                  <Textarea
-                    id="new-item-content"
-                    className="min-h-32 font-mono text-xs"
+                  <Label>Content</Label>
+                  <MarkdownEditor
                     value={form.content}
-                    onChange={(event) => setForm({ ...form, content: event.target.value })}
+                    onChange={(next) => setForm({ ...form, content: next })}
                   />
                 </>
               )}

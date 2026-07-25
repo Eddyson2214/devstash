@@ -136,3 +136,167 @@
 .devstash-code-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
   background: rgba(212, 212, 216, 0.4) !important;
 }
+
+.devstash-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 212, 216, 0.25) transparent;
+}
+
+.devstash-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.devstash-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(212, 212, 216, 0.25);
+}
+
+.devstash-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 212, 216, 0.4);
+}
+
+.markdown-preview {
+  color: rgb(228 228 231);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.markdown-preview > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-preview > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4,
+.markdown-preview h5,
+.markdown-preview h6 {
+  font-weight: 600;
+  color: rgb(250 250 250);
+  margin-top: 1.25em;
+  margin-bottom: 0.5em;
+}
+
+.markdown-preview h1 {
+  font-size: 1.5em;
+  border-bottom: 1px solid rgba(212, 212, 216, 0.15);
+  padding-bottom: 0.3em;
+}
+
+.markdown-preview h2 {
+  font-size: 1.3em;
+  border-bottom: 1px solid rgba(212, 212, 216, 0.15);
+  padding-bottom: 0.3em;
+}
+
+.markdown-preview h3 {
+  font-size: 1.15em;
+}
+
+.markdown-preview h4 {
+  font-size: 1em;
+}
+
+.markdown-preview h5,
+.markdown-preview h6 {
+  font-size: 0.9em;
+}
+
+.markdown-preview p {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+.markdown-preview a {
+  color: rgb(96 165 250);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.markdown-preview a:hover {
+  color: rgb(147 197 253);
+}
+
+.markdown-preview ul,
+.markdown-preview ol {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+  padding-left: 1.5em;
+}
+
+.markdown-preview ul {
+  list-style-type: disc;
+}
+
+.markdown-preview ol {
+  list-style-type: decimal;
+}
+
+.markdown-preview li + li {
+  margin-top: 0.25em;
+}
+
+.markdown-preview blockquote {
+  margin: 0 0 0.75em;
+  padding: 0.1em 1em;
+  border-left: 3px solid rgba(212, 212, 216, 0.3);
+  color: rgb(161 161 170);
+}
+
+.markdown-preview code {
+  background: rgba(212, 212, 216, 0.12);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85em;
+}
+
+.markdown-preview pre {
+  background: rgb(30 30 30);
+  border: 1px solid rgba(212, 212, 216, 0.15);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  margin-bottom: 0.75em;
+  overflow-x: auto;
+}
+
+.markdown-preview pre code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+.markdown-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+  font-size: 0.9em;
+}
+
+.markdown-preview th,
+.markdown-preview td {
+  border: 1px solid rgba(212, 212, 216, 0.2);
+  padding: 0.4em 0.6em;
+  text-align: left;
+}
+
+.markdown-preview th {
+  background: rgba(212, 212, 216, 0.08);
+  font-weight: 600;
+}
+
+.markdown-preview hr {
+  border: none;
+  border-top: 1px solid rgba(212, 212, 216, 0.15);
+  margin: 1em 0;
+}
+
+.markdown-preview img {
+  max-width: 100%;
+  border-radius: 6px;
+}
