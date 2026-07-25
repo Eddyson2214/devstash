@@ -16,6 +16,7 @@ export interface DashboardItem {
   id: string;
   title: string;
   description: string | null;
+  fileUrl: string | null;
   fileName: string | null;
   fileSize: number | null;
   isFavorite: boolean;
@@ -66,6 +67,7 @@ function toDashboardItem(item: {
   id: string;
   title: string;
   description: string | null;
+  fileUrl: string | null;
   fileName: string | null;
   fileSize: number | null;
   isFavorite: boolean;
@@ -78,6 +80,7 @@ function toDashboardItem(item: {
     id: item.id,
     title: item.title,
     description: item.description,
+    fileUrl: item.fileUrl,
     fileName: item.fileName,
     fileSize: item.fileSize,
     isFavorite: item.isFavorite,
