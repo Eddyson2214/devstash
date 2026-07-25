@@ -1,15 +1,19 @@
-# Current Feature
+# Current Feature: Items Grid — Three Columns on Larger Screens
 <!--Feature name and short description -->
 
 ## Status
-
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- `/items/[type]` grid shows 3 columns on larger screens instead of the current 2-column cap
+- Stay responsive: keep 1 column on small screens, step up through 2 columns at a mid breakpoint, and reach 3 columns on large screens
+- No change to `ItemCard` itself — only the grid's column breakpoints in `src/components/items/ItemGrid.tsx`
 
 ## Notes
 <!-- Any extra notes -->
+- Current grid: `grid grid-cols-1 gap-4 md:grid-cols-2` in `src/components/items/ItemGrid.tsx:15` — caps at 2 columns from `md` up, even on wide desktop viewports
+- Target: `grid-cols-1` (mobile) → `md:grid-cols-2` (tablet) → `lg:grid-cols-3` (desktop/large screens)
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
