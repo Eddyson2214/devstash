@@ -35,6 +35,25 @@ export interface ItemTypeWithCount {
   count: number;
 }
 
+export interface ItemDetail {
+  id: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  contentType: string;
+  url: string | null;
+  language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  itemType: DashboardItemType;
+  tags: string[];
+  collections: { id: string; name: string }[];
+}
+
 async function getDemoUser() {
   return prisma.user.findUnique({ where: { email: DEMO_USER_EMAIL } });
 }
@@ -118,6 +137,37 @@ export async function getItemsByType(itemTypeId: string): Promise<DashboardItem[
   });
 
   return items.map(toDashboardItem);
+}
+
+export async function getItemDetail(id: string, userId: string): Promise<ItemDetail | null> {
+  const item = await prisma.item.findFirst({
+    where: { id, userId },
+    include: { itemType: true, tags: true, collections: { include: { collection: true } } },
+  });
+
+  if (!item) return null;
+
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    content: item.content,
+    contentType: item.contentType,
+    url: item.url,
+    language: item.language,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    itemType: item.itemType,
+    tags: item.tags.map((tag) => tag.name),
+    collections: item.collections.map(({ collection }) => ({
+      id: collection.id,
+      name: collection.name,
+    })),
+  };
 }
 
 export async function getItemTypesWithCounts(): Promise<ItemTypeWithCount[]> {

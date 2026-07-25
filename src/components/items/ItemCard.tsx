@@ -1,7 +1,10 @@
+"use client";
+
 import { Pin, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useItemDrawer } from "@/components/items/ItemDrawerProvider";
 import type { DashboardItem } from "@/lib/db/items";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
@@ -19,9 +22,22 @@ interface ItemCardProps {
 
 export function ItemCard({ item }: ItemCardProps) {
   const Icon = TYPE_ICONS[item.itemType.icon];
+  const { openItemDrawer } = useItemDrawer();
 
   return (
-    <Card className="gap-3 border-l-4" style={{ borderLeftColor: item.itemType.color }}>
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => openItemDrawer(item.id)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openItemDrawer(item.id);
+        }
+      }}
+      className="cursor-pointer gap-3 border-l-4 transition-colors hover:bg-muted/50"
+      style={{ borderLeftColor: item.itemType.color }}
+    >
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-2">
           <div

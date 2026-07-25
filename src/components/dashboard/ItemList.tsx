@@ -1,6 +1,9 @@
+"use client";
+
 import { Pin, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { useItemDrawer } from "@/components/items/ItemDrawerProvider";
 import type { DashboardItem } from "@/lib/db/items";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
@@ -18,6 +21,8 @@ interface ItemListProps {
 }
 
 export function ItemList({ title, items: listItems, emptyMessage }: ItemListProps) {
+  const { openItemDrawer } = useItemDrawer();
+
   return (
     <section>
       <h3 className="mb-3 text-lg font-semibold">{title}</h3>
@@ -28,7 +33,16 @@ export function ItemList({ title, items: listItems, emptyMessage }: ItemListProp
           return (
             <div
               key={item.id}
-              className="flex items-start gap-3 rounded-lg border-l-4 bg-card p-4 ring-1 ring-foreground/10"
+              role="button"
+              tabIndex={0}
+              onClick={() => openItemDrawer(item.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openItemDrawer(item.id);
+                }
+              }}
+              className="flex cursor-pointer items-start gap-3 rounded-lg border-l-4 bg-card p-4 ring-1 ring-foreground/10 transition-colors hover:bg-muted/50"
               style={{ borderLeftColor: item.itemType.color }}
             >
               <div
