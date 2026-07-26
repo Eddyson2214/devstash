@@ -35,6 +35,7 @@ const createItemSchema = z
     fileName: z.string().trim().min(1).nullable(),
     fileSize: z.number().int().positive().nullable(),
     tags: z.array(z.string().trim().min(1)),
+    collectionIds: z.array(z.string()).default([]),
   })
   .refine((data) => data.type !== "link" || data.url !== null, {
     message: "URL is required",
@@ -78,6 +79,7 @@ export async function createItem(
     fileSize: parsed.data.fileSize,
     tags: parsed.data.tags,
     itemTypeId: itemType.id,
+    collectionIds: parsed.data.collectionIds,
   });
 
   return { success: true, data: created };
@@ -90,6 +92,7 @@ const updateItemSchema = z.object({
   url: z.string().trim().url("Enter a valid URL").nullable(),
   language: z.string().trim().min(1).nullable(),
   tags: z.array(z.string().trim().min(1)),
+  collectionIds: z.array(z.string()).default([]),
 });
 
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;

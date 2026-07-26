@@ -1,9 +1,11 @@
 "use client";
 
+import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { CollectionOption } from "@/lib/db/collections";
 
 export interface EditFormState {
   id: string;
@@ -13,6 +15,7 @@ export interface EditFormState {
   url: string;
   language: string;
   tagsInput: string;
+  collectionIds: string[];
 }
 
 interface ItemEditFormProps {
@@ -21,9 +24,19 @@ interface ItemEditFormProps {
   showsContent: boolean;
   showsLanguage: boolean;
   showsUrl: boolean;
+  collections: CollectionOption[];
+  collectionsLoading: boolean;
 }
 
-export function ItemEditForm({ form, onChange, showsContent, showsLanguage, showsUrl }: ItemEditFormProps) {
+export function ItemEditForm({
+  form,
+  onChange,
+  showsContent,
+  showsLanguage,
+  showsUrl,
+  collections,
+  collectionsLoading,
+}: ItemEditFormProps) {
   return (
     <>
       <div className="flex flex-col gap-1.5">
@@ -65,6 +78,14 @@ export function ItemEditForm({ form, onChange, showsContent, showsLanguage, show
           />
         </div>
       )}
+
+      <CollectionCheckboxList
+        idPrefix="item-edit"
+        collections={collections}
+        selectedIds={form.collectionIds}
+        onChange={(collectionIds) => onChange({ ...form, collectionIds })}
+        loading={collectionsLoading}
+      />
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="item-tags">Tags</Label>

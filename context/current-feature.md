@@ -1,14 +1,27 @@
-# Current Feature
+# Current Feature: Add Item to Collection(s)
 <!--Feature name and short description -->
+Add an input to the New Item dialog and the Item Edit form that lets the user select from their existing collections (single or multiple) and link the item to them on create/save.
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- `NewItemDialog` gets a new "Collections" field: a multi-select of the user's existing collections. Selecting none is allowed (item just isn't in any collection).
+- `ItemEditForm` gets the same field, pre-populated with the item's current collections, editable, and saved on submit.
+- Creating an item links it to every selected collection via `ItemCollection` rows.
+- Saving an edited item reconciles membership: adds rows for newly-selected collections, removes rows for deselected ones, leaves unchanged ones alone.
+- Only the signed-in user's own collections are selectable (and only their own collections are ever linked) — no cross-user leakage.
+- Does NOT create new collections from this input — selection only, from collections that already exist.
+- Out of scope: no collection detail/listing page, no way to view "which items are in this collection" from the collection side. Viewing which collections an item belongs to already exists read-only in the Item Drawer.
 
 ## Notes
 <!-- Any extra notes -->
+- No function currently lists *all* of a user's collections (existing ones only fetch "recent" or "favorite" subsets in `src/lib/db/collections.ts`) — will need a new one for the picker, correctly scoped to the session user via a `userId` param (not the pre-existing `getDemoUserId()` bug already tracked on `getRecentCollections`/`getFavoriteCollections`/`getCollectionStats` — leave those alone, don't fix in this feature).
+- No multi-select UI component exists yet in `src/components/ui/` (no `checkbox.tsx`, no `popover`/`command` combobox). Default plan, absent objection: add shadcn's `checkbox.tsx` and render a simple scrollable checkbox list of the user's collections by name — matches this input's low complexity better than building a searchable combobox, and collection counts are expected to be small. Flag if a searchable multi-select is actually wanted instead.
+- `ItemCollection` is a pure join table (`itemId`, `collectionId`, `addedAt`, composite PK, cascade delete both sides) — no extra fields to preserve when reconciling membership.
+- `createItem`/`updateItem` Server Actions in `src/actions/items.ts` need a new `collectionIds: string[]` field on their Zod schemas; the db-layer `createItem`/`updateItem` in `src/lib/db/items.ts` need to write `ItemCollection` rows (create: connect nested creates; update: reconcile via diff, or delete-all-then-recreate mirroring how tags are already replaced on update).
+- `getItemDetail`'s existing `ItemDetail.collections` shape (`{ id, name }[]`) can be reused to pre-populate the edit form's initial selection with no new query needed.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

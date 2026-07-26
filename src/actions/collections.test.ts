@@ -6,14 +6,16 @@ vi.mock("@/auth", () => ({
 
 vi.mock("@/lib/db/collections", () => ({
   createCollection: vi.fn(),
+  getAllCollections: vi.fn(),
 }));
 
 import { auth } from "@/auth";
-import { createCollection as createCollectionQuery } from "@/lib/db/collections";
-import { createCollection } from "@/actions/collections";
+import { createCollection as createCollectionQuery, getAllCollections } from "@/lib/db/collections";
+import { createCollection, listCollections } from "@/actions/collections";
 
 const mockedAuth = vi.mocked(auth);
 const mockedCreateCollectionQuery = vi.mocked(createCollectionQuery);
+const mockedGetAllCollections = vi.mocked(getAllCollections);
 
 const validInput = {
   name: "React Patterns",
@@ -70,5 +72,29 @@ describe("createCollection", () => {
       name: "React Patterns",
       description: "UI patterns",
     });
+  });
+});
+
+describe("listCollections", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await listCollections();
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedGetAllCollections).not.toHaveBeenCalled();
+  });
+
+  it("returns the session user's collections on success", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    const collections = [{ id: "collection-1", name: "React Patterns" }];
+    mockedGetAllCollections.mockResolvedValue(collections);
+
+    const result = await listCollections();
+
+    expect(result).toEqual({ success: true, data: collections });
+    expect(mockedGetAllCollections).toHaveBeenCalledWith("user-1");
   });
 });

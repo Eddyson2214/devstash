@@ -6,6 +6,7 @@ import { Plus, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
+import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { FileUpload, type UploadedFile } from "@/components/items/FileUpload";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCollections } from "@/hooks/use-collections";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
 interface ItemTypeOption {
@@ -62,6 +64,7 @@ interface FormState {
   language: string;
   file: UploadedFile | null;
   tagsInput: string;
+  collectionIds: string[];
 }
 
 function emptyForm(defaultType: CreatableItemType): FormState {
@@ -74,6 +77,7 @@ function emptyForm(defaultType: CreatableItemType): FormState {
     language: "",
     file: null,
     tagsInput: "",
+    collectionIds: [],
   };
 }
 
@@ -90,6 +94,7 @@ export function NewItemDialog({
   const [open, setOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<FormState>(() => emptyForm(defaultType));
+  const { collections, loading: collectionsLoading } = useCollections(open);
 
   const showsContent = CONTENT_TYPES.has(form.type);
   const showsLanguage = LANGUAGE_TYPES.has(form.type);
@@ -124,6 +129,7 @@ export function NewItemDialog({
       fileName: showsFile ? (form.file?.fileName ?? null) : null,
       fileSize: showsFile ? (form.file?.fileSize ?? null) : null,
       tags,
+      collectionIds: form.collectionIds,
     });
 
     setCreating(false);
@@ -237,6 +243,14 @@ export function NewItemDialog({
             language={form.language}
             onLanguageChange={(next) => setForm({ ...form, language: next })}
             languageInputId="new-item-language"
+          />
+
+          <CollectionCheckboxList
+            idPrefix="new-item"
+            collections={collections}
+            selectedIds={form.collectionIds}
+            onChange={(collectionIds) => setForm({ ...form, collectionIds })}
+            loading={collectionsLoading}
           />
 
           <div className="flex flex-col gap-1.5">

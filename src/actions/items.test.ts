@@ -97,7 +97,25 @@ describe("updateItem", () => {
     const result = await updateItem("item-1", validInput);
 
     expect(result).toEqual({ success: true, data: updated });
-    expect(mockedUpdateItemQuery).toHaveBeenCalledWith("item-1", "user-1", validInput);
+    expect(mockedUpdateItemQuery).toHaveBeenCalledWith("item-1", "user-1", {
+      ...validInput,
+      collectionIds: [],
+    });
+  });
+
+  it("passes through the selected collection ids", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedUpdateItemQuery.mockResolvedValue({ id: "item-1" });
+
+    await updateItem("item-1", { ...validInput, collectionIds: ["collection-1", "collection-2"] });
+
+    expect(mockedUpdateItemQuery).toHaveBeenCalledWith(
+      "item-1",
+      "user-1",
+      expect.objectContaining({ collectionIds: ["collection-1", "collection-2"] })
+    );
   });
 });
 
@@ -229,7 +247,27 @@ describe("createItem", () => {
       fileSize: null,
       tags: ["react"],
       itemTypeId: "type-1",
+      collectionIds: [],
     });
+  });
+
+  it("passes through the selected collection ids", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedGetItemTypeBySlug.mockResolvedValue({ id: "type-1", name: "Snippet" });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedCreateItemQuery.mockResolvedValue({ id: "item-1" });
+
+    await createItem({
+      ...validCreateInput,
+      collectionIds: ["collection-1", "collection-2"],
+    });
+
+    expect(mockedCreateItemQuery).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({ collectionIds: ["collection-1", "collection-2"] })
+    );
   });
 
   it("uses URL content type for link items", async () => {

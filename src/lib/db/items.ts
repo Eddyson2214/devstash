@@ -189,6 +189,17 @@ export async function getItemDetail(id: string, userId: string): Promise<ItemDet
   return item ? toItemDetail(item) : null;
 }
 
+async function resolveOwnedCollectionIds(userId: string, collectionIds: string[]): Promise<string[]> {
+  if (collectionIds.length === 0) return [];
+
+  const owned = await prisma.collection.findMany({
+    where: { id: { in: [...new Set(collectionIds)] }, userId },
+    select: { id: true },
+  });
+
+  return owned.map((collection) => collection.id);
+}
+
 export interface UpdateItemData {
   title: string;
   description: string | null;
@@ -196,6 +207,7 @@ export interface UpdateItemData {
   url: string | null;
   language: string | null;
   tags: string[];
+  collectionIds: string[];
 }
 
 export async function updateItem(
@@ -205,6 +217,8 @@ export async function updateItem(
 ): Promise<ItemDetail | null> {
   const existing = await prisma.item.findFirst({ where: { id, userId } });
   if (!existing) return null;
+
+  const ownedCollectionIds = await resolveOwnedCollectionIds(userId, data.collectionIds);
 
   const item = await prisma.item.update({
     where: { id },
@@ -217,6 +231,10 @@ export async function updateItem(
       tags: {
         set: [],
         connectOrCreate: data.tags.map((name) => ({ where: { name }, create: { name } })),
+      },
+      collections: {
+        deleteMany: {},
+        create: ownedCollectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     include: { itemType: true, tags: true, collections: { include: { collection: true } } },
@@ -237,9 +255,12 @@ export interface CreateItemData {
   fileSize: number | null;
   tags: string[];
   itemTypeId: string;
+  collectionIds: string[];
 }
 
 export async function createItem(userId: string, data: CreateItemData): Promise<ItemDetail> {
+  const ownedCollectionIds = await resolveOwnedCollectionIds(userId, data.collectionIds);
+
   const item = await prisma.item.create({
     data: {
       title: data.title,
@@ -255,6 +276,9 @@ export async function createItem(userId: string, data: CreateItemData): Promise<
       itemTypeId: data.itemTypeId,
       tags: {
         connectOrCreate: data.tags.map((name) => ({ where: { name }, create: { name } })),
+      },
+      collections: {
+        create: ownedCollectionIds.map((collectionId) => ({ collectionId })),
       },
     },
     include: { itemType: true, tags: true, collections: { include: { collection: true } } },

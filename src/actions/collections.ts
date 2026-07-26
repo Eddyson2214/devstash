@@ -5,6 +5,8 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import {
   createCollection as createCollectionQuery,
+  getAllCollections,
+  type CollectionOption,
   type CreatedCollection,
 } from "@/lib/db/collections";
 
@@ -31,4 +33,17 @@ export async function createCollection(
   const created = await createCollectionQuery(session.user.id, parsed.data);
 
   return { success: true, data: created };
+}
+
+export async function listCollections(): Promise<
+  { success: true; data: CollectionOption[] } | { success: false; error: string }
+> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const collections = await getAllCollections(session.user.id);
+
+  return { success: true, data: collections };
 }

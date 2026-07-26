@@ -11,6 +11,7 @@ import { ItemViewContent } from "@/components/items/ItemViewContent";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCollections } from "@/hooks/use-collections";
 import { useItemDrawerData } from "@/hooks/use-item-drawer-data";
 
 const CONTENT_TYPE_NAMES = new Set(["Snippet", "Prompt", "Command", "Note"]);
@@ -41,6 +42,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const [deleting, setDeleting] = useState(false);
 
   const editing = form !== null && form.id === itemId;
+  const { collections, loading: collectionsLoading } = useCollections(editing);
 
   function handleOpenChange(next: boolean) {
     if (!next) setForm(null);
@@ -70,6 +72,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
       url: item.url ?? "",
       language: item.language ?? "",
       tagsInput: item.tags.join(", "),
+      collectionIds: item.collections.map((collection) => collection.id),
     });
   }
 
@@ -94,6 +97,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
       url: showsUrl ? form.url.trim() || null : item.url,
       language: showsLanguage ? form.language.trim() || null : item.language,
       tags,
+      collectionIds: form.collectionIds,
     });
 
     setSaving(false);
@@ -167,12 +171,14 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                   showsContent={showsContent}
                   showsLanguage={showsLanguage}
                   showsUrl={showsUrl}
+                  collections={collections}
+                  collectionsLoading={collectionsLoading}
                 />
               ) : (
                 <ItemViewContent item={item} showsFile={showsFile} showsLanguage={showsLanguage} />
               )}
 
-              {item.collections.length > 0 && (
+              {!editing && item.collections.length > 0 && (
                 <section>
                   <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                     Collections

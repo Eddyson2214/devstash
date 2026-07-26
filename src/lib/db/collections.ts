@@ -26,6 +26,11 @@ export interface CollectionStats {
   favorites: number;
 }
 
+export interface CollectionOption {
+  id: string;
+  name: string;
+}
+
 interface CollectionWithItems {
   id: string;
   name: string;
@@ -107,6 +112,14 @@ export async function getFavoriteCollections(): Promise<RecentCollection[]> {
   });
 
   return collections.map(toRecentCollection);
+}
+
+export async function getAllCollections(userId: string): Promise<CollectionOption[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true },
+  });
 }
 
 export interface CreateCollectionData {
