@@ -5,11 +5,8 @@ import { ArrowLeft, Folder, Package } from "lucide-react";
 
 import { auth } from "@/auth";
 import { UserAvatar } from "@/components/auth/UserAvatar";
-import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
-import { DeleteAccountDialog } from "@/components/profile/DeleteAccountDialog";
 import { ItemTypeBreakdown } from "@/components/profile/ItemTypeBreakdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { getProfileStats, getProfileUser } from "@/lib/db/profile";
 
 export const metadata: Metadata = {
@@ -89,31 +86,6 @@ export default async function ProfilePage() {
           <div>
             <p className="mb-3 text-sm font-medium text-muted-foreground">Items by type</p>
             <ItemTypeBreakdown itemsByType={stats.itemsByType} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-6">
-          {user.hasPassword && (
-            <>
-              <div>
-                <p className="mb-3 text-sm font-medium">Change Password</p>
-                <ChangePasswordForm />
-              </div>
-              <Separator />
-            </>
-          )}
-
-          <div>
-            <p className="mb-1 text-sm font-medium">Delete Account</p>
-            <p className="mb-3 text-sm text-muted-foreground">
-              Permanently delete your account and all of your items and collections.
-            </p>
-            <DeleteAccountDialog />
           </div>
         </CardContent>
       </Card>

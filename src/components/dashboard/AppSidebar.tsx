@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, Code, Folder, Layers, LogOut, Star, User as UserIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Code,
+  Folder,
+  Layers,
+  LogOut,
+  Settings,
+  Star,
+  User as UserIcon,
+} from "lucide-react";
 
 import { signOutAction } from "@/actions/auth";
 import { UserAvatar } from "@/components/auth/UserAvatar";
@@ -166,6 +175,10 @@ export function AppSidebar({ itemTypes, favoriteCollections, recentCollections, 
                 <DropdownMenuItem render={<Link href="/profile" />}>
                   <UserIcon aria-hidden="true" />
                   Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem render={<Link href="/settings" />}>
+                  <Settings aria-hidden="true" />
+                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onClick={() => signOutAction()}>
