@@ -314,6 +314,26 @@ export async function deleteItem(
   return { fileUrl: existing.fileUrl };
 }
 
+export interface SearchableItem {
+  id: string;
+  title: string;
+  description: string | null;
+  itemType: DashboardItemType;
+}
+
+export async function getSearchableItems(userId: string): Promise<SearchableItem[]> {
+  return prisma.item.findMany({
+    where: { userId },
+    orderBy: { title: "asc" },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      itemType: { select: { id: true, name: true, icon: true, color: true } },
+    },
+  });
+}
+
 export async function getItemTypesWithCounts(userId: string): Promise<ItemTypeWithCount[]> {
   const [itemTypes, counts] = await Promise.all([
     prisma.itemType.findMany({ where: { isSystem: true }, orderBy: { id: "asc" } }),

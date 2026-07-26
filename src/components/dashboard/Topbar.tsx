@@ -1,8 +1,11 @@
+"use client";
+
 import { Search } from "lucide-react";
 
 import type { CreatableItemType } from "@/actions/items";
 import { NewCollectionDialog } from "@/components/dashboard/NewCollectionDialog";
 import { NewItemDialog } from "@/components/items/NewItemDialog";
+import { useCommandPalette } from "@/components/search/CommandPaletteProvider";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -11,6 +14,8 @@ interface TopbarProps {
 }
 
 export function Topbar({ defaultItemType }: TopbarProps) {
+  const { openCommandPalette } = useCommandPalette();
+
   return (
     <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border px-6">
       <SidebarTrigger />
@@ -21,10 +26,11 @@ export function Topbar({ defaultItemType }: TopbarProps) {
           aria-hidden="true"
         />
         <Input
-          placeholder="Search items..."
+          placeholder="Search items... ⌘K"
           aria-label="Search items"
           className="pl-9"
           readOnly
+          onClick={openCommandPalette}
         />
       </div>
 

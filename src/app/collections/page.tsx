@@ -5,6 +5,7 @@ import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { CollectionGrid } from "@/components/collections/CollectionGrid";
 import { ItemDrawerProvider } from "@/components/items/ItemDrawerProvider";
+import { CommandPaletteProvider } from "@/components/search/CommandPaletteProvider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import {
   getCollectionsForUser,
@@ -33,31 +34,33 @@ export default async function CollectionsPage() {
 
   return (
     <ItemDrawerProvider>
-      <SidebarProvider className="min-h-screen">
-        <AppSidebar
-          itemTypes={itemTypes}
-          favoriteCollections={favoriteCollections}
-          recentCollections={recentCollections}
-          user={{
-            name: session?.user?.name,
-            email: session?.user?.email,
-            image: session?.user?.image,
-          }}
-        />
-        <SidebarInset>
-          <Topbar />
-          <main className="flex flex-1 flex-col gap-8 p-6">
-            <div>
-              <h2 className="text-2xl font-bold">Collections</h2>
-              <p className="text-muted-foreground">
-                {collections.length} collection{collections.length === 1 ? "" : "s"}
-              </p>
-            </div>
+      <CommandPaletteProvider>
+        <SidebarProvider className="min-h-screen">
+          <AppSidebar
+            itemTypes={itemTypes}
+            favoriteCollections={favoriteCollections}
+            recentCollections={recentCollections}
+            user={{
+              name: session?.user?.name,
+              email: session?.user?.email,
+              image: session?.user?.image,
+            }}
+          />
+          <SidebarInset>
+            <Topbar />
+            <main className="flex flex-1 flex-col gap-8 p-6">
+              <div>
+                <h2 className="text-2xl font-bold">Collections</h2>
+                <p className="text-muted-foreground">
+                  {collections.length} collection{collections.length === 1 ? "" : "s"}
+                </p>
+              </div>
 
-            <CollectionGrid collections={collections} emptyMessage="No collections yet." />
-          </main>
-        </SidebarInset>
-      </SidebarProvider>
+              <CollectionGrid collections={collections} emptyMessage="No collections yet." />
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
+      </CommandPaletteProvider>
     </ItemDrawerProvider>
   );
 }

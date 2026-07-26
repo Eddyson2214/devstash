@@ -1,14 +1,28 @@
-# Current Feature
+# Current Feature: Global Search / Command Palette
 <!--Feature name and short description -->
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Global command palette opens with Cmd+K (Mac) / Ctrl+K (Windows), from anywhere in the app.
+- Fuzzy search across all of the signed-in user's items and collections.
+- Results grouped into an Items section and a Collections section.
+- Keyboard navigation (arrow keys to move, Enter to select).
+- Each result shows the item type icon (items) or item count (collections).
+- Selecting an item opens its drawer; selecting a collection navigates to `/collections/[id]`.
+- The Topbar's search input (currently a readonly placeholder reading "Search items...") opens the palette on click.
+- Search input placeholder shows a ⌘K hint.
 
 ## Notes
 <!-- Any extra notes -->
+- Use shadcn's `cmdk`-based `Command` component (not yet installed — no `cmdk` dependency or `src/components/ui/command.tsx` in this codebase yet).
+- Search is client-side/in-memory (`cmdk`'s built-in fuzzy filtering) — no server round-trip per keystroke. Searchable data (items: id/title/type/content preview; collections: id/name/itemCount) is pre-fetched once, not re-fetched on every keystroke.
+- Open question on architecture, flagged for before `/feature start`: no existing query returns *all* of a user's items across every type in one call (`getItemsByType` is per-type, `getRecentItems` is limit-capped) — a new `getAllItems(userId)`-style query is needed. Similarly, `getAllCollections(userId)` returns id/name only (no `itemCount`); `getCollectionsForUser(userId)` has `itemCount` but is heavier than needed (full type-icon breakdown, accent color). Plan: add a new lightweight query for search (or extend `getAllCollections`) rather than reusing the heavier one.
+- Open question: where the "pre-fetch on app load" happens. Every shell page (`/dashboard`, `/items/[type]`, `/collections`, `/collections/[id]`) already independently fetches its own sidebar data server-side — duplicating an "all items + all collections" fetch into each of those would add DB load on every navigation. Leaning toward a single client-side fetch via a new API route, called once on mount by a new `CommandPaletteProvider` (mirroring the existing `ItemDrawerProvider` pattern) rendered once high in the tree, rather than server-fetching search data per-page.
+- Opening an item's drawer from the palette reuses the existing `ItemDrawerProvider`/`useItemDrawer` context already used by `ItemCard` etc. — the palette just needs access to the same provider (both would need to be mounted together, or the palette needs to live inside `ItemDrawerProvider`'s tree).
+- The Topbar's search `Input` is already `readOnly` with the exact placeholder text this feature expects it to have — built as a stub anticipating this feature.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

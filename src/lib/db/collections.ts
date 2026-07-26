@@ -190,6 +190,26 @@ export async function createCollection(
   };
 }
 
+export interface SearchableCollection {
+  id: string;
+  name: string;
+  itemCount: number;
+}
+
+export async function getSearchableCollections(userId: string): Promise<SearchableCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, _count: { select: { items: true } } },
+  });
+
+  return collections.map((collection) => ({
+    id: collection.id,
+    name: collection.name,
+    itemCount: collection._count.items,
+  }));
+}
+
 export interface UpdateCollectionData {
   name: string;
   description: string | null;
