@@ -1,7 +1,6 @@
 "use client";
 
-import { CodeEditor } from "@/components/items/CodeEditor";
-import { MarkdownEditor } from "@/components/items/MarkdownEditor";
+import { ItemContentFields } from "@/components/items/ItemContentFields";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,39 +44,15 @@ export function ItemEditForm({ form, onChange, showsContent, showsLanguage, show
         />
       </div>
 
-      {showsContent && (
-        <div className="flex flex-col gap-1.5">
-          {showsLanguage ? (
-            <>
-              <Label>Content</Label>
-              <CodeEditor
-                value={form.content}
-                onChange={(next) => onChange({ ...form, content: next })}
-                language={form.language || null}
-              />
-            </>
-          ) : (
-            <>
-              <Label>Content</Label>
-              <MarkdownEditor
-                value={form.content}
-                onChange={(next) => onChange({ ...form, content: next })}
-              />
-            </>
-          )}
-        </div>
-      )}
-
-      {showsLanguage && (
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="item-language">Language</Label>
-          <Input
-            id="item-language"
-            value={form.language}
-            onChange={(event) => onChange({ ...form, language: event.target.value })}
-          />
-        </div>
-      )}
+      <ItemContentFields
+        showsContent={showsContent}
+        showsLanguage={showsLanguage}
+        content={form.content}
+        onContentChange={(next) => onChange({ ...form, content: next })}
+        language={form.language}
+        onLanguageChange={(next) => onChange({ ...form, language: next })}
+        languageInputId="item-language"
+      />
 
       {showsUrl && (
         <div className="flex flex-col gap-1.5">

@@ -6,9 +6,8 @@ import { Plus, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { createItem, type CreatableItemType } from "@/actions/items";
-import { CodeEditor } from "@/components/items/CodeEditor";
 import { FileUpload, type UploadedFile } from "@/components/items/FileUpload";
-import { MarkdownEditor } from "@/components/items/MarkdownEditor";
+import { ItemContentFields } from "@/components/items/ItemContentFields";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -230,39 +229,15 @@ export function NewItemDialog({
             </div>
           )}
 
-          {showsContent && (
-            <div className="flex flex-col gap-1.5">
-              {showsLanguage ? (
-                <>
-                  <Label>Content</Label>
-                  <CodeEditor
-                    value={form.content}
-                    onChange={(next) => setForm({ ...form, content: next })}
-                    language={form.language || null}
-                  />
-                </>
-              ) : (
-                <>
-                  <Label>Content</Label>
-                  <MarkdownEditor
-                    value={form.content}
-                    onChange={(next) => setForm({ ...form, content: next })}
-                  />
-                </>
-              )}
-            </div>
-          )}
-
-          {showsLanguage && (
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="new-item-language">Language</Label>
-              <Input
-                id="new-item-language"
-                value={form.language}
-                onChange={(event) => setForm({ ...form, language: event.target.value })}
-              />
-            </div>
-          )}
+          <ItemContentFields
+            showsContent={showsContent}
+            showsLanguage={showsLanguage}
+            content={form.content}
+            onContentChange={(next) => setForm({ ...form, content: next })}
+            language={form.language}
+            onLanguageChange={(next) => setForm({ ...form, language: next })}
+            languageInputId="new-item-language"
+          />
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="new-item-tags">Tags</Label>
