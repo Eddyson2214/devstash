@@ -346,7 +346,7 @@ flowchart LR
     subgraph Infra["Infrastructure"]
         DB[(Neon Postgres via Prisma)]
         R2[(Cloudflare R2 — files/images)]
-        Redis[(Redis — optional caching)]
+        Redis[(Upstash Redis — auth rate limiting)]
         OpenAI[OpenAI gpt-5-nano]
         Stripe[Stripe — billing]
     end
@@ -361,7 +361,7 @@ flowchart LR
     AIAPI --> OpenAI
     AIAPI --> DB
     AuthAPI --> DB
-    ItemsAPI -.optional cache.-> Redis
+    AuthAPI -.rate limiting.-> Redis
     AuthAPI --> Stripe
 ```
 
@@ -376,7 +376,7 @@ flowchart LR
 | **Language** | TypeScript | End-to-end type safety |
 | **Database** | [Neon](https://neon.tech/docs) (Postgres, serverless) | Cloud-hosted |
 | **ORM** | [Prisma 7](https://www.prisma.io/docs) | ⚠️ Migrations only — **never** `db push` in dev or prod |
-| **Caching** | Redis (maybe) | Deferred — evaluate need post-MVP |
+| **Rate Limiting** | [Upstash Redis](https://upstash.com/docs/redis) (`@upstash/ratelimit`) | Sliding-window limits on auth endpoints; item-read caching still deferred |
 | **File Storage** | [Cloudflare R2](https://developers.cloudflare.com/r2/) | For `file` / `image` item types |
 | **Auth** | [Auth.js (NextAuth) v5](https://authjs.dev) | Email/password + GitHub OAuth |
 | **AI** | OpenAI `gpt-5-nano` | Auto-tagging, summaries, code explanation, prompt optimization |
@@ -454,7 +454,7 @@ Refers to the screenshots below as a base for the dashboard UI. It does not to b
 ## ❓ Open Questions / Decisions Needed
 
 - **Custom item types**: full spec deferred to post-MVP (Pro feature) — needs its own icon/color picker UX.
-- **Redis caching**: worth adding at launch, or defer until there's measurable read load?
+- **Item-read caching**: Redis is already in the stack (Upstash, used for auth rate limiting) — worth reusing it for item-read caching at launch, or defer until there's measurable read load?
 - **Export formats**: confirm exact formats (JSON confirmed; ZIP for files — Markdown export for notes/snippets?).
 - **Tag model**: currently global/unscoped (`Tag.name @unique`) — should tags be scoped per-user to avoid collisions across accounts?
 - **`contentType` vs per-type storage**: confirm the `TEXT | URL | FILE` enum on `Item` covers all seven system types cleanly (e.g. does `note` differ meaningfully from `snippet` at the schema level, or only in UI/icon?).
