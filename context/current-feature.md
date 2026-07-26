@@ -1,14 +1,26 @@
-# Current Feature
+# Current Feature: Collection Edit, Delete & Favorite Actions
 <!--Feature name and short description -->
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- `/collections/[id]` header gets an action bar with Edit, Delete, and Favorite buttons (icon buttons, matching the style of `ItemDrawerActions`' action bar).
+  - Edit opens a modal to edit the collection's metadata (name, description).
+  - Delete opens a confirmation, then deletes the collection — items in it are NOT deleted, they just stop belonging to that collection (Prisma's existing `ItemCollection.collection` `onDelete: Cascade` already only removes the join rows, not the `Item` rows, so a plain `collection.delete` gives this for free).
+  - Favorite is just the icon/button for now — no persistence, no backend call (matches the existing disabled "Coming soon" precedent for Favorite/Pin in `ItemDrawerActions`).
+- Collection cards (`CollectionCard`, used on both `/collections` and the dashboard's `RecentCollections`) get a 3-dot menu button showing a dropdown with Edit / Delete / Favorite. Clicking anywhere else on the card still navigates to `/collections/[id]`.
 
 ## Notes
 <!-- Any extra notes -->
+- New `updateCollection(id, userId, data)` and `deleteCollection(id, userId)` in `src/lib/db/collections.ts`, both ownership-scoped (`findFirst`/`where: { id, userId }`, matching `getCollectionById`'s pattern), plus matching `updateCollection`/`deleteCollection` Server Actions in `src/actions/collections.ts` (Zod-validated name/description for update, mirroring `createCollection`'s schema).
+- Favorite defaults to a disabled button, consistent with `ItemDrawerActions`' existing Favorite/Pin stubs — flagging this in case the user wants a different treatment (e.g. clickable but silently no-op) before `/feature start`.
+- `CollectionCard` currently wraps the whole card in a `<Link>` — that has to change to an `onClick`/`useRouter().push` navigation pattern (like `ItemCard` already does for the drawer) since a `DropdownMenuTrigger` button can't legally nest inside an `<a>`, and the dropdown's own clicks need `stopPropagation` so they don't also trigger navigation.
+- Delete confirmation copy should make the "items aren't deleted" behavior explicit to the user (e.g. "Items in this collection will not be deleted — they'll just no longer be part of it."), since that's the one behavior a user could reasonably assume is destructive but isn't.
+- On `/collections/[id]`, after a successful delete there's no page left to show — redirect to `/collections` (mirroring how `deleteAccount` redirects away after success) rather than trying to stay on a now-404 route.
+- On the card dropdown (`/collections` and dashboard), after a successful delete/edit, `router.refresh()` to update the list in place (matching the existing item CRUD pattern), no redirect needed since the list page itself is still valid.
+- Reuse the same Edit modal component (and Delete confirmation) between the detail page's action bar and the card's dropdown menu rather than building two separate implementations.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

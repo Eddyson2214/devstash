@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { Star } from "lucide-react";
 
 import { auth } from "@/auth";
+import { CollectionDetailActions } from "@/components/collections/CollectionDetailActions";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { ItemDrawerProvider } from "@/components/items/ItemDrawerProvider";
@@ -59,19 +60,23 @@ export default async function CollectionDetailPage({
         <SidebarInset>
           <Topbar />
           <main className="flex flex-1 flex-col gap-8 p-6">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-2xl font-bold">{collection.name}</h2>
-                {collection.isFavorite && (
-                  <Star className="size-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <h2 className="text-2xl font-bold">{collection.name}</h2>
+                  {collection.isFavorite && (
+                    <Star className="size-4 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  )}
+                </div>
+                {collection.description && (
+                  <p className="text-muted-foreground">{collection.description}</p>
                 )}
+                <p className="text-sm text-muted-foreground">
+                  {items.length} item{items.length === 1 ? "" : "s"}
+                </p>
               </div>
-              {collection.description && (
-                <p className="text-muted-foreground">{collection.description}</p>
-              )}
-              <p className="text-sm text-muted-foreground">
-                {items.length} item{items.length === 1 ? "" : "s"}
-              </p>
+
+              <CollectionDetailActions collection={collection} />
             </div>
 
             <ItemGrid items={items} emptyMessage="No items in this collection yet." />

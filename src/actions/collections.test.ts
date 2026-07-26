@@ -7,15 +7,29 @@ vi.mock("@/auth", () => ({
 vi.mock("@/lib/db/collections", () => ({
   createCollection: vi.fn(),
   getAllCollections: vi.fn(),
+  updateCollection: vi.fn(),
+  deleteCollection: vi.fn(),
 }));
 
 import { auth } from "@/auth";
-import { createCollection as createCollectionQuery, getAllCollections } from "@/lib/db/collections";
-import { createCollection, listCollections } from "@/actions/collections";
+import {
+  createCollection as createCollectionQuery,
+  deleteCollection as deleteCollectionQuery,
+  getAllCollections,
+  updateCollection as updateCollectionQuery,
+} from "@/lib/db/collections";
+import {
+  createCollection,
+  deleteCollection,
+  listCollections,
+  updateCollection,
+} from "@/actions/collections";
 
 const mockedAuth = vi.mocked(auth);
 const mockedCreateCollectionQuery = vi.mocked(createCollectionQuery);
 const mockedGetAllCollections = vi.mocked(getAllCollections);
+const mockedUpdateCollectionQuery = vi.mocked(updateCollectionQuery);
+const mockedDeleteCollectionQuery = vi.mocked(deleteCollectionQuery);
 
 const validInput = {
   name: "React Patterns",
@@ -96,5 +110,82 @@ describe("listCollections", () => {
 
     expect(result).toEqual({ success: true, data: collections });
     expect(mockedGetAllCollections).toHaveBeenCalledWith("user-1");
+  });
+});
+
+describe("updateCollection", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await updateCollection("collection-1", validInput);
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedUpdateCollectionQuery).not.toHaveBeenCalled();
+  });
+
+  it("rejects an empty name before hitting the database", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+
+    const result = await updateCollection("collection-1", { ...validInput, name: "   " });
+
+    expect(result).toEqual({ success: false, error: "Name is required" });
+    expect(mockedUpdateCollectionQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the collection isn't found or isn't owned by the user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedUpdateCollectionQuery.mockResolvedValue(null);
+
+    const result = await updateCollection("collection-1", validInput);
+
+    expect(result).toEqual({ success: false, error: "Collection not found" });
+  });
+
+  it("updates the collection and returns it on success", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    const updated = { id: "collection-1", name: "React Patterns", description: null };
+    mockedUpdateCollectionQuery.mockResolvedValue(updated);
+
+    const result = await updateCollection("collection-1", validInput);
+
+    expect(result).toEqual({ success: true, data: updated });
+    expect(mockedUpdateCollectionQuery).toHaveBeenCalledWith("collection-1", "user-1", validInput);
+  });
+});
+
+describe("deleteCollection", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await deleteCollection("collection-1");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedDeleteCollectionQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the collection isn't found or isn't owned by the user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedDeleteCollectionQuery.mockResolvedValue(false);
+
+    const result = await deleteCollection("collection-1");
+
+    expect(result).toEqual({ success: false, error: "Collection not found" });
+  });
+
+  it("deletes the collection on success", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedDeleteCollectionQuery.mockResolvedValue(true);
+
+    const result = await deleteCollection("collection-1");
+
+    expect(result).toEqual({ success: true });
+    expect(mockedDeleteCollectionQuery).toHaveBeenCalledWith("collection-1", "user-1");
   });
 });
