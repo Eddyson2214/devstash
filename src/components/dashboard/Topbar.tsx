@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 
 import type { CreatableItemType } from "@/actions/items";
+import { NewCollectionDialog } from "@/components/dashboard/NewCollectionDialog";
 import { NewItemDialog } from "@/components/items/NewItemDialog";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -28,6 +29,7 @@ export function Topbar({ defaultItemType }: TopbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <NewCollectionDialog />
         <NewItemDialog defaultType={defaultItemType} />
       </div>
     </header>

@@ -109,6 +109,36 @@ export async function getFavoriteCollections(): Promise<RecentCollection[]> {
   return collections.map(toRecentCollection);
 }
 
+export interface CreateCollectionData {
+  name: string;
+  description: string | null;
+}
+
+export interface CreatedCollection {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+export async function createCollection(
+  userId: string,
+  data: CreateCollectionData
+): Promise<CreatedCollection> {
+  const collection = await prisma.collection.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      userId,
+    },
+  });
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+  };
+}
+
 export async function getCollectionStats(): Promise<CollectionStats> {
   const userId = await getDemoUserId();
   if (!userId) return { total: 0, favorites: 0 };
