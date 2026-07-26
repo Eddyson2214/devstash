@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { ItemList } from "@/components/dashboard/ItemList";
@@ -21,8 +23,13 @@ const RECENT_COLLECTIONS_LIMIT = 6;
 const SIDEBAR_RECENT_COLLECTIONS_LIMIT = 5;
 
 export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+  const userId = session.user.id;
+
   const [
-    session,
     pinnedItems,
     recentItems,
     itemTypes,
@@ -31,13 +38,12 @@ export default async function DashboardPage() {
     itemStats,
     collectionStats,
   ] = await Promise.all([
-    auth(),
-    getPinnedItems(),
-    getRecentItems(RECENT_ITEMS_LIMIT),
-    getItemTypesWithCounts(),
+    getPinnedItems(userId),
+    getRecentItems(userId, RECENT_ITEMS_LIMIT),
+    getItemTypesWithCounts(userId),
     getFavoriteCollections(),
     getRecentCollections(RECENT_COLLECTIONS_LIMIT),
-    getItemStats(),
+    getItemStats(userId),
     getCollectionStats(),
   ]);
 

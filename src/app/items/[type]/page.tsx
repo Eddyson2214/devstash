@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import type { CreatableItemType } from "@/actions/items";
 import { auth } from "@/auth";
@@ -39,10 +39,15 @@ export default async function ItemTypePage({
     notFound();
   }
 
-  const [session, items, itemTypes, favoriteCollections, recentCollections] = await Promise.all([
-    auth(),
-    getItemsByType(itemType.id),
-    getItemTypesWithCounts(),
+  const session = await auth();
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+  const userId = session.user.id;
+
+  const [items, itemTypes, favoriteCollections, recentCollections] = await Promise.all([
+    getItemsByType(userId, itemType.id),
+    getItemTypesWithCounts(userId),
     getFavoriteCollections(),
     getRecentCollections(SIDEBAR_RECENT_COLLECTIONS_LIMIT),
   ]);

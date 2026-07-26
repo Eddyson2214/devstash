@@ -1,14 +1,22 @@
-# Current Feature
+# Current Feature: Session-Scoped Item Reads
 <!--Feature name and short description -->
+Fix item reads in `src/lib/db/items.ts` to scope to the signed-in session user instead of a hardcoded demo user, so the item drawer stops failing with "Couldn't load this item." for any account other than `demo@devstash.io`.
 
 ## Status
-
+Not Started
 
 ## Goals
 <!-- Goals and requirements -->
+- `getPinnedItems`, `getRecentItems`, `getItemStats`, `getItemsByType`, `getItemTypesWithCounts` in `src/lib/db/items.ts` take the session `userId` instead of calling the hardcoded `getDemoUser()`.
+- Callers (`DashboardPage`, `items/[type]/page.tsx`) pass `session.user.id` from `auth()`.
+- Clicking an item card opens the drawer successfully for any signed-in user — no more 404/"Couldn't load this item." mismatch against `getItemDetail`, which is already session-scoped.
+- No regression to existing demo-account behavior or other item flows (create/update/delete).
 
 ## Notes
 <!-- Any extra notes -->
+- Root cause: `getItemDetail` (used by the drawer's `/api/items/[id]` fetch) is correctly scoped via `findFirst({ id, userId: session.user.id })`, but `getPinnedItems`/`getRecentItems`/`getItemStats`/`getItemsByType` still call a hardcoded `getDemoUser()` — so the grid/sidebar can show items owned by the demo user while the signed-in session is someone else, and the ownership check on open fails.
+- This gap was already flagged as known debt in the 2026-07-19 Profile Page and 2026-07-25 Item Drawer history entries below.
+- Scope is deliberately limited to `src/lib/db/items.ts`. `src/lib/db/collections.ts` has the identical `getDemoUserId()` pattern (`getRecentCollections`, `getFavoriteCollections`, `getCollectionStats`) and was noted as a matching gap in the 2026-07-26 Collection Create entry, but is out of scope here since the user's report was specifically about item loading — likely a good follow-up feature.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
