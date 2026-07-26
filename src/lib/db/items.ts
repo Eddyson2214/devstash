@@ -137,6 +137,19 @@ export async function getItemsByType(userId: string, itemTypeId: string): Promis
   return items.map(toDashboardItem);
 }
 
+export async function getItemsByCollection(
+  userId: string,
+  collectionId: string
+): Promise<DashboardItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, collections: { some: { collectionId } } },
+    orderBy: { createdAt: "desc" },
+    include: { itemType: true, tags: true },
+  });
+
+  return items.map(toDashboardItem);
+}
+
 function toItemDetail(item: {
   id: string;
   title: string;

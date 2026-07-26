@@ -1,14 +1,24 @@
-# Current Feature
+# Current Feature: Collections List & Detail Pages
 <!--Feature name and short description -->
 
 ## Status
-
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- New `/collections` page listing all of the signed-in user's collections, using the existing collection card look (from `RecentCollections`) — icon-tagged by most-used item type, item count, favorite star, description.
+- New `/collections/[id]` page showing the items that belong to that collection, rendered with the existing item cards/grid (`ItemCard`/`ItemGrid`), not a new card design.
+- Sidebar's "View all collections" link already points to `/collections` (`AppSidebar.tsx:139`) — just needs the destination page to exist.
+- Every collection card (on the new `/collections` page AND the dashboard's `RecentCollections`) links to its `/collections/[id]` page.
 
 ## Notes
 <!-- Any extra notes -->
+- Reuse `RecentCollections`' existing `Card` markup/style for the `/collections` grid rather than inventing a new look.
+- Reuse `ItemCard` + `ItemGrid` for the items-in-collection list on `/collections/[id]` (mixed item types allowed per collection, so no per-type dispatch like `/items/[type]` has).
+- Must be session-scoped from the start (`auth()` + `session.user.id`), matching the pattern from the 2026-07-26 session-scoped-item-reads fix — do NOT reintroduce the hardcoded-demo-user pattern still used by `getRecentCollections`/`getFavoriteCollections`/`getCollectionStats` in `src/lib/db/collections.ts`. Those three are out of scope to fix here (flagged tech debt from a prior feature), but new queries for this feature should not copy that pattern.
+- `getAllCollections(userId)` in `src/lib/db/collections.ts` already exists (id/name only, used for the checkbox picker) — likely needs a new session-scoped query (e.g. `getCollectionsForUser`) returning the richer `RecentCollection`-shaped data (item count, type icons, accent color) for the `/collections` grid, similar to `toRecentCollection`'s mapping.
+- No existing query fetches items by collection — will need a new one (e.g. in `src/lib/db/items.ts` or `collections.ts`) that's ownership-scoped and returns data shaped for `ItemGrid`/`ItemCard`.
+- 404 for an unknown/not-owned collection id on `/collections/[id]`, consistent with `/items/[type]`'s unknown-slug 404.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

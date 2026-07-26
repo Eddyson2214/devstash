@@ -122,6 +122,44 @@ export async function getAllCollections(userId: string): Promise<CollectionOptio
   });
 }
 
+export async function getCollectionsForUser(userId: string): Promise<RecentCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  });
+
+  return collections.map(toRecentCollection);
+}
+
+export async function getCollectionById(
+  id: string,
+  userId: string
+): Promise<RecentCollection | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id, userId },
+    include: {
+      items: {
+        include: {
+          item: {
+            include: { itemType: true },
+          },
+        },
+      },
+    },
+  });
+
+  return collection ? toRecentCollection(collection) : null;
+}
+
 export interface CreateCollectionData {
   name: string;
   description: string | null;
