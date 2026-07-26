@@ -1,49 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Download, FileText, Pencil, Pin, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
-import { CodeEditor } from "@/components/items/CodeEditor";
-import { MarkdownEditor } from "@/components/items/MarkdownEditor";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ItemDrawerActions } from "@/components/items/ItemDrawerActions";
+import { ItemEditForm, type EditFormState } from "@/components/items/ItemEditForm";
+import { ItemViewContent } from "@/components/items/ItemViewContent";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import type { ItemDetail } from "@/lib/db/items";
-import { formatFileSize } from "@/lib/file-upload";
-import { TYPE_ICONS } from "@/lib/type-icons";
-
-type FetchedItemDetail = Omit<ItemDetail, "createdAt" | "updatedAt"> & {
-  createdAt: string;
-  updatedAt: string;
-};
-
-interface EditFormState {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  url: string;
-  language: string;
-  tagsInput: string;
-}
+import { useItemDrawerData } from "@/hooks/use-item-drawer-data";
 
 const CONTENT_TYPE_NAMES = new Set(["Snippet", "Prompt", "Command", "Note"]);
 const LANGUAGE_TYPE_NAMES = new Set(["Snippet", "Command"]);
@@ -66,32 +34,12 @@ interface ItemDrawerProps {
 
 export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const router = useRouter();
-  const [result, setResult] = useState<{ id: string; detail: FetchedItemDetail | null } | null>(
-    null
-  );
+  const { item, loading, setItem } = useItemDrawerData(itemId, open);
   const [form, setForm] = useState<EditFormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    if (!open || !itemId) return;
-
-    let cancelled = false;
-
-    fetch(`/api/items/${itemId}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: FetchedItemDetail | null) => {
-        if (!cancelled) setResult({ id: itemId, detail: data });
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open, itemId]);
-
-  const loading = itemId !== null && result?.id !== itemId;
-  const item = result?.id === itemId ? result.detail : null;
   const editing = form !== null && form.id === itemId;
 
   function handleOpenChange(next: boolean) {
@@ -155,13 +103,10 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
       return;
     }
 
-    setResult({
-      id: response.data.id,
-      detail: {
-        ...response.data,
-        createdAt: response.data.createdAt.toISOString(),
-        updatedAt: response.data.updatedAt.toISOString(),
-      },
+    setItem({
+      ...response.data,
+      createdAt: response.data.createdAt.toISOString(),
+      updatedAt: response.data.updatedAt.toISOString(),
     });
     setForm(null);
     toast.success("Item updated");
@@ -186,7 +131,6 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     router.refresh();
   }
 
-  const Icon = item ? TYPE_ICONS[item.itemType.icon] : null;
   const copyText = item?.content ?? item?.url ?? "";
 
   return (
@@ -198,260 +142,34 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
           <p className="p-4 text-sm text-muted-foreground">Couldn&apos;t load this item.</p>
         ) : (
           <>
-            <SheetHeader className="gap-3 border-b p-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-md"
-                  style={{ backgroundColor: `${item.itemType.color}1a` }}
-                >
-                  {Icon && (
-                    <Icon
-                      className="size-5"
-                      style={{ color: item.itemType.color }}
-                      aria-hidden="true"
-                    />
-                  )}
-                </div>
-                <SheetTitle className="text-lg">{item.title}</SheetTitle>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                <Badge variant="secondary">{item.itemType.name}</Badge>
-                {item.language && <Badge variant="secondary">{item.language}</Badge>}
-              </div>
-
-              {editing ? (
-                <div className="flex items-center gap-2">
-                  <Button size="sm" onClick={handleSave} disabled={saving || !form?.title.trim()}>
-                    Save
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={cancelEdit} disabled={saving}>
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" disabled title="Coming soon">
-                    <Star
-                      className={item.isFavorite ? "fill-amber-400 text-amber-400" : ""}
-                      aria-hidden="true"
-                    />
-                    Favorite
-                  </Button>
-                  <Button variant="ghost" size="sm" disabled title="Coming soon">
-                    <Pin aria-hidden="true" />
-                    Pin
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleCopy} disabled={!copyText}>
-                    <Copy aria-hidden="true" />
-                    Copy
-                  </Button>
-                  {showsFile && item.fileUrl && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      nativeButton={false}
-                      render={<a href={`/api/download/${item.id}`} download={item.fileName ?? true} />}
-                    >
-                      <Download aria-hidden="true" />
-                      Download
-                    </Button>
-                  )}
-                  <div className="ml-auto flex items-center gap-1">
-                    <Button variant="ghost" size="sm" onClick={startEdit}>
-                      <Pencil aria-hidden="true" />
-                      Edit
-                    </Button>
-                    <AlertDialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
-                      <AlertDialogTrigger render={<Button variant="ghost" size="icon-sm" />}>
-                        <Trash2 className="text-destructive" aria-hidden="true" />
-                        <span className="sr-only">Delete</span>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete this item?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This permanently deletes &ldquo;{item.title}&rdquo;. This action
-                            cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            variant="destructive"
-                            disabled={deleting}
-                            onClick={handleDelete}
-                          >
-                            {deleting ? "Deleting..." : "Delete"}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              )}
-            </SheetHeader>
+            <ItemDrawerActions
+              item={item}
+              editing={editing}
+              canSave={!!form?.title.trim()}
+              saving={saving}
+              deleting={deleting}
+              confirmingDelete={confirmingDelete}
+              onConfirmingDeleteChange={setConfirmingDelete}
+              showsFile={showsFile}
+              copyText={copyText}
+              onCopy={handleCopy}
+              onSave={handleSave}
+              onCancelEdit={cancelEdit}
+              onStartEdit={startEdit}
+              onDelete={handleDelete}
+            />
 
             <div className="flex flex-col gap-6 p-4">
               {editing && form ? (
-                <>
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="item-title">Title</Label>
-                    <Input
-                      id="item-title"
-                      value={form.title}
-                      onChange={(event) => setForm({ ...form, title: event.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="item-description">Description</Label>
-                    <Textarea
-                      id="item-description"
-                      value={form.description}
-                      onChange={(event) => setForm({ ...form, description: event.target.value })}
-                    />
-                  </div>
-
-                  {showsContent && (
-                    <div className="flex flex-col gap-1.5">
-                      {showsLanguage ? (
-                        <>
-                          <Label>Content</Label>
-                          <CodeEditor
-                            value={form.content}
-                            onChange={(next) => setForm({ ...form, content: next })}
-                            language={form.language || null}
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <Label>Content</Label>
-                          <MarkdownEditor
-                            value={form.content}
-                            onChange={(next) => setForm({ ...form, content: next })}
-                          />
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {showsLanguage && (
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="item-language">Language</Label>
-                      <Input
-                        id="item-language"
-                        value={form.language}
-                        onChange={(event) => setForm({ ...form, language: event.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  {showsUrl && (
-                    <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="item-url">URL</Label>
-                      <Input
-                        id="item-url"
-                        type="url"
-                        value={form.url}
-                        onChange={(event) => setForm({ ...form, url: event.target.value })}
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="item-tags">Tags</Label>
-                    <Input
-                      id="item-tags"
-                      placeholder="Comma-separated"
-                      value={form.tagsInput}
-                      onChange={(event) => setForm({ ...form, tagsInput: event.target.value })}
-                    />
-                  </div>
-                </>
+                <ItemEditForm
+                  form={form}
+                  onChange={setForm}
+                  showsContent={showsContent}
+                  showsLanguage={showsLanguage}
+                  showsUrl={showsUrl}
+                />
               ) : (
-                <>
-                  {item.description && (
-                    <section>
-                      <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        Description
-                      </h4>
-                      <p className="text-sm">{item.description}</p>
-                    </section>
-                  )}
-
-                  {item.contentType === "URL" && item.url ? (
-                    <section>
-                      <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        URL
-                      </h4>
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm break-all text-primary underline underline-offset-4"
-                      >
-                        {item.url}
-                      </a>
-                    </section>
-                  ) : showsFile && item.fileUrl ? (
-                    <section>
-                      <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        {item.itemType.name === "Image" ? "Image" : "File"}
-                      </h4>
-                      {item.itemType.name === "Image" ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- remote R2 URL, not a local asset
-                        <img
-                          src={item.fileUrl}
-                          alt={item.fileName ?? item.title}
-                          className="max-h-72 w-full rounded-lg border border-border/60 bg-muted object-contain"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-3 rounded-lg border border-border/60 p-3">
-                          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
-                            <FileText className="size-5 text-muted-foreground" aria-hidden="true" />
-                          </div>
-                          <div className="flex min-w-0 flex-col">
-                            <span className="truncate text-sm font-medium">{item.fileName}</span>
-                            {item.fileSize !== null && (
-                              <span className="text-xs text-muted-foreground">
-                                {formatFileSize(item.fileSize)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </section>
-                  ) : (
-                    item.content && (
-                      <section>
-                        <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                          Content
-                        </h4>
-                        {showsLanguage ? (
-                          <CodeEditor value={item.content} language={item.language} readOnly />
-                        ) : (
-                          <MarkdownEditor value={item.content} readOnly />
-                        )}
-                      </section>
-                    )
-                  )}
-
-                  {item.tags.length > 0 && (
-                    <section>
-                      <h4 className="mb-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                        Tags
-                      </h4>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </>
+                <ItemViewContent item={item} showsFile={showsFile} showsLanguage={showsLanguage} />
               )}
 
               {item.collections.length > 0 && (
