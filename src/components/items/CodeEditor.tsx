@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Editor, { type OnMount } from "@monaco-editor/react";
+import Editor, { type BeforeMount, type OnMount } from "@monaco-editor/react";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 
+import { useEditorPreferences } from "@/components/settings/EditorPreferencesProvider";
 import { cn } from "@/lib/utils";
 import { toMonacoLanguage } from "@/lib/monaco-language";
+import { registerCustomMonacoThemes } from "@/lib/monaco-themes";
 
 const MIN_HEIGHT = 100;
 const MAX_HEIGHT = 400;
@@ -27,6 +29,11 @@ export function CodeEditor({
   className,
 }: CodeEditorProps) {
   const [height, setHeight] = useState(MIN_HEIGHT);
+  const { preferences } = useEditorPreferences();
+
+  const handleBeforeMount: BeforeMount = (monaco) => {
+    registerCustomMonacoThemes(monaco);
+  };
 
   const handleMount: OnMount = (editor) => {
     const applyHeight = () => {
@@ -77,14 +84,17 @@ export function CodeEditor({
           height="100%"
           language={toMonacoLanguage(language)}
           value={value}
-          theme="vs-dark"
+          theme={preferences.theme}
+          beforeMount={handleBeforeMount}
           onMount={handleMount}
           onChange={readOnly ? undefined : (next) => onChange?.(next ?? "")}
           options={{
             readOnly,
             domReadOnly: readOnly,
-            minimap: { enabled: false },
-            fontSize: 13,
+            minimap: { enabled: preferences.minimap },
+            fontSize: preferences.fontSize,
+            tabSize: preferences.tabSize,
+            wordWrap: preferences.wordWrap ? "on" : "off",
             lineNumbersMinChars: 3,
             scrollBeyondLastLine: false,
             renderLineHighlight: readOnly ? "none" : "line",

@@ -58,6 +58,8 @@ model User {
   image         String?
   password      String? // bcrypt hash; null for OAuth-only users
 
+  editorPreferences Json? // fontSize/tabSize/wordWrap/minimap/theme; null resolves to hard defaults on read
+
   // Billing
   isPro                Boolean @default(false)
   stripeCustomerId     String? @unique
