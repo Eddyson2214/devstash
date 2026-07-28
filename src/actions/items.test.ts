@@ -10,6 +10,7 @@ vi.mock("@/lib/db/items", () => ({
   createItem: vi.fn(),
   getItemTypeBySlug: vi.fn(),
   toggleItemFavorite: vi.fn(),
+  toggleItemPin: vi.fn(),
 }));
 
 vi.mock("@/lib/r2", () => ({
@@ -23,10 +24,11 @@ import {
   deleteItem as deleteItemQuery,
   getItemTypeBySlug,
   toggleItemFavorite as toggleItemFavoriteQuery,
+  toggleItemPin as toggleItemPinQuery,
   updateItem as updateItemQuery,
 } from "@/lib/db/items";
 import { deleteFromR2 } from "@/lib/r2";
-import { createItem, deleteItem, toggleItemFavorite, updateItem } from "@/actions/items";
+import { createItem, deleteItem, toggleItemFavorite, toggleItemPin, updateItem } from "@/actions/items";
 
 const mockedAuth = vi.mocked(auth);
 const mockedUpdateItemQuery = vi.mocked(updateItemQuery);
@@ -34,6 +36,7 @@ const mockedDeleteItemQuery = vi.mocked(deleteItemQuery);
 const mockedCreateItemQuery = vi.mocked(createItemQuery);
 const mockedGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
 const mockedToggleItemFavoriteQuery = vi.mocked(toggleItemFavoriteQuery);
+const mockedToggleItemPinQuery = vi.mocked(toggleItemPinQuery);
 const mockedDeleteFromR2 = vi.mocked(deleteFromR2);
 
 const validInput = {
@@ -373,5 +376,38 @@ describe("toggleItemFavorite", () => {
 
     expect(result).toEqual({ success: true, isFavorite: true });
     expect(mockedToggleItemFavoriteQuery).toHaveBeenCalledWith("item-1", "user-1");
+  });
+});
+
+describe("toggleItemPin", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await toggleItemPin("item-1");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedToggleItemPinQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the item doesn't exist or isn't owned by the session user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleItemPinQuery.mockResolvedValue(null);
+
+    const result = await toggleItemPin("item-1");
+
+    expect(result).toEqual({ success: false, error: "Item not found" });
+  });
+
+  it("toggles the item's pinned state and returns the new value", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleItemPinQuery.mockResolvedValue(true);
+
+    const result = await toggleItemPin("item-1");
+
+    expect(result).toEqual({ success: true, isPinned: true });
+    expect(mockedToggleItemPinQuery).toHaveBeenCalledWith("item-1", "user-1");
   });
 });

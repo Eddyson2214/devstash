@@ -8,6 +8,7 @@ import {
   deleteItem as deleteItemQuery,
   getItemTypeBySlug,
   toggleItemFavorite as toggleItemFavoriteQuery,
+  toggleItemPin as toggleItemPinQuery,
   updateItem as updateItemQuery,
   type ItemDetail,
 } from "@/lib/db/items";
@@ -154,4 +155,20 @@ export async function toggleItemFavorite(
   }
 
   return { success: true, isFavorite };
+}
+
+export async function toggleItemPin(
+  itemId: string
+): Promise<{ success: true; isPinned: boolean } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const isPinned = await toggleItemPinQuery(itemId, session.user.id);
+  if (isPinned === null) {
+    return { success: false, error: "Item not found" };
+  }
+
+  return { success: true, isPinned };
 }

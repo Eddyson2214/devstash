@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { deleteItem, toggleItemFavorite, updateItem } from "@/actions/items";
+import { deleteItem, toggleItemFavorite, toggleItemPin, updateItem } from "@/actions/items";
 import { ItemDrawerActions } from "@/components/items/ItemDrawerActions";
 import { ItemEditForm, type EditFormState } from "@/components/items/ItemEditForm";
 import { ItemViewContent } from "@/components/items/ItemViewContent";
@@ -41,6 +41,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [togglingFavorite, setTogglingFavorite] = useState(false);
+  const [togglingPin, setTogglingPin] = useState(false);
 
   const editing = form !== null && form.id === itemId;
   const { collections, loading: collectionsLoading } = useCollections(editing);
@@ -152,6 +153,26 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleTogglePin() {
+    if (!item) return;
+
+    const previousItem = item;
+    setItem({ ...item, isPinned: !item.isPinned });
+    setTogglingPin(true);
+
+    const response = await toggleItemPin(item.id);
+    setTogglingPin(false);
+
+    if (!response.success) {
+      setItem(previousItem);
+      toast.error(response.error);
+      return;
+    }
+
+    toast.success(response.isPinned ? "Item pinned" : "Item unpinned");
+    router.refresh();
+  }
+
   const copyText = item?.content ?? item?.url ?? "";
 
   return (
@@ -180,6 +201,8 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
               onDelete={handleDelete}
               onToggleFavorite={handleToggleFavorite}
               togglingFavorite={togglingFavorite}
+              onTogglePin={handleTogglePin}
+              togglingPin={togglingPin}
             />
 
             <div className="flex flex-col gap-6 p-4">

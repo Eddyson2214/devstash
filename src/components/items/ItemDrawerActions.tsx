@@ -36,6 +36,8 @@ interface ItemDrawerActionsProps {
   onDelete: () => void;
   onToggleFavorite: () => void;
   togglingFavorite: boolean;
+  onTogglePin: () => void;
+  togglingPin: boolean;
 }
 
 export function ItemDrawerActions({
@@ -55,6 +57,8 @@ export function ItemDrawerActions({
   onDelete,
   onToggleFavorite,
   togglingFavorite,
+  onTogglePin,
+  togglingPin,
 }: ItemDrawerActionsProps) {
   const Icon = TYPE_ICONS[item.itemType.icon];
 
@@ -93,8 +97,11 @@ export function ItemDrawerActions({
             />
             Favorite
           </Button>
-          <Button variant="ghost" size="sm" disabled title="Coming soon">
-            <Pin aria-hidden="true" />
+          <Button variant="ghost" size="sm" onClick={onTogglePin} disabled={togglingPin}>
+            <Pin
+              className={item.isPinned ? "fill-foreground" : ""}
+              aria-hidden="true"
+            />
             Pin
           </Button>
           <Button variant="ghost" size="sm" onClick={onCopy} disabled={!copyText}>

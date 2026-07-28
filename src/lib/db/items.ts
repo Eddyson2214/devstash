@@ -130,7 +130,7 @@ export async function getItemTypeBySlug(slug: string): Promise<DashboardItemType
 export async function getItemsByType(userId: string, itemTypeId: string): Promise<DashboardItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, itemTypeId },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     include: { itemType: true, tags: true },
   });
 
@@ -163,7 +163,7 @@ export async function getItemsByCollection(
 ): Promise<DashboardItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, collections: { some: { collectionId } } },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ isPinned: "desc" }, { createdAt: "desc" }],
     include: { itemType: true, tags: true },
   });
 
@@ -348,6 +348,22 @@ export async function toggleItemFavorite(id: string, userId: string): Promise<bo
   });
 
   return updated.isFavorite;
+}
+
+export async function toggleItemPin(id: string, userId: string): Promise<boolean | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { isPinned: true },
+  });
+  if (!existing) return null;
+
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isPinned: !existing.isPinned },
+    select: { isPinned: true },
+  });
+
+  return updated.isPinned;
 }
 
 export interface SearchableItem {
