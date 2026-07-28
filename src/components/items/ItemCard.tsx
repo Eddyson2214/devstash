@@ -1,9 +1,11 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Copy, Pin, Star } from "lucide-react";
 import { toast } from "sonner";
 
+import { toggleItemFavorite } from "@/actions/items";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +28,7 @@ interface ItemCardProps {
 export function ItemCard({ item }: ItemCardProps) {
   const Icon = TYPE_ICONS[item.itemType.icon];
   const { openItemDrawer } = useItemDrawer();
+  const router = useRouter();
   const copyText = item.content ?? item.url ?? "";
 
   async function handleCopy(event: MouseEvent) {
@@ -34,6 +37,18 @@ export function ItemCard({ item }: ItemCardProps) {
 
     await navigator.clipboard.writeText(copyText);
     toast.success("Copied to clipboard");
+  }
+
+  async function handleToggleFavorite(event: MouseEvent) {
+    event.stopPropagation();
+
+    const response = await toggleItemFavorite(item.id);
+    if (!response.success) {
+      toast.error(response.error);
+      return;
+    }
+
+    router.refresh();
   }
 
   return (
@@ -68,9 +83,17 @@ export function ItemCard({ item }: ItemCardProps) {
               </Button>
             )}
             {item.isPinned && <Pin className="size-3.5 text-muted-foreground" aria-hidden="true" />}
-            {item.isFavorite && (
-              <Star className="size-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
-            )}
+            <Button variant="ghost" size="icon-sm" onClick={handleToggleFavorite}>
+              <Star
+                className={
+                  item.isFavorite ? "size-3.5 fill-amber-400 text-amber-400" : "size-3.5"
+                }
+                aria-hidden="true"
+              />
+              <span className="sr-only">
+                {item.isFavorite ? "Unfavorite" : "Favorite"} {item.title}
+              </span>
+            </Button>
           </div>
         </div>
 

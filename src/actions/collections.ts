@@ -7,6 +7,7 @@ import {
   createCollection as createCollectionQuery,
   deleteCollection as deleteCollectionQuery,
   getAllCollections,
+  toggleCollectionFavorite as toggleCollectionFavoriteQuery,
   updateCollection as updateCollectionQuery,
   type CollectionOption,
   type CreatedCollection,
@@ -80,6 +81,22 @@ export async function deleteCollection(
   }
 
   return { success: true };
+}
+
+export async function toggleCollectionFavorite(
+  id: string
+): Promise<{ success: true; isFavorite: boolean } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const isFavorite = await toggleCollectionFavoriteQuery(id, session.user.id);
+  if (isFavorite === null) {
+    return { success: false, error: "Collection not found" };
+  }
+
+  return { success: true, isFavorite };
 }
 
 export async function listCollections(): Promise<

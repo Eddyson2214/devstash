@@ -9,6 +9,7 @@ vi.mock("@/lib/db/collections", () => ({
   getAllCollections: vi.fn(),
   updateCollection: vi.fn(),
   deleteCollection: vi.fn(),
+  toggleCollectionFavorite: vi.fn(),
 }));
 
 import { auth } from "@/auth";
@@ -16,12 +17,14 @@ import {
   createCollection as createCollectionQuery,
   deleteCollection as deleteCollectionQuery,
   getAllCollections,
+  toggleCollectionFavorite as toggleCollectionFavoriteQuery,
   updateCollection as updateCollectionQuery,
 } from "@/lib/db/collections";
 import {
   createCollection,
   deleteCollection,
   listCollections,
+  toggleCollectionFavorite,
   updateCollection,
 } from "@/actions/collections";
 
@@ -30,6 +33,7 @@ const mockedCreateCollectionQuery = vi.mocked(createCollectionQuery);
 const mockedGetAllCollections = vi.mocked(getAllCollections);
 const mockedUpdateCollectionQuery = vi.mocked(updateCollectionQuery);
 const mockedDeleteCollectionQuery = vi.mocked(deleteCollectionQuery);
+const mockedToggleCollectionFavoriteQuery = vi.mocked(toggleCollectionFavoriteQuery);
 
 const validInput = {
   name: "React Patterns",
@@ -187,5 +191,38 @@ describe("deleteCollection", () => {
 
     expect(result).toEqual({ success: true });
     expect(mockedDeleteCollectionQuery).toHaveBeenCalledWith("collection-1", "user-1");
+  });
+});
+
+describe("toggleCollectionFavorite", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await toggleCollectionFavorite("collection-1");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedToggleCollectionFavoriteQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the collection isn't found or isn't owned by the user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleCollectionFavoriteQuery.mockResolvedValue(null);
+
+    const result = await toggleCollectionFavorite("collection-1");
+
+    expect(result).toEqual({ success: false, error: "Collection not found" });
+  });
+
+  it("toggles the collection's favorite state and returns the new value", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleCollectionFavoriteQuery.mockResolvedValue(true);
+
+    const result = await toggleCollectionFavorite("collection-1");
+
+    expect(result).toEqual({ success: true, isFavorite: true });
+    expect(mockedToggleCollectionFavoriteQuery).toHaveBeenCalledWith("collection-1", "user-1");
   });
 });

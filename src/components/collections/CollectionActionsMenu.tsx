@@ -4,7 +4,9 @@ import type { MouseEvent } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreVertical, Pencil, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { toggleCollectionFavorite } from "@/actions/collections";
 import { DeleteCollectionDialog } from "@/components/collections/DeleteCollectionDialog";
 import { EditCollectionDialog } from "@/components/collections/EditCollectionDialog";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,17 @@ export function CollectionActionsMenu({ collection }: CollectionActionsMenuProps
     router.refresh();
   }
 
+  async function handleToggleFavorite() {
+    const response = await toggleCollectionFavorite(collection.id);
+
+    if (!response.success) {
+      toast.error(response.error);
+      return;
+    }
+
+    router.refresh();
+  }
+
   return (
     // React bubbles portaled content (dropdown menu, dialogs) through the React tree, not the
     // DOM tree, so without this the Card's onClick navigation would still fire on every click
@@ -52,9 +65,12 @@ export function CollectionActionsMenu({ collection }: CollectionActionsMenuProps
             <Pencil aria-hidden="true" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <Star aria-hidden="true" />
-            Favorite
+          <DropdownMenuItem onClick={handleToggleFavorite}>
+            <Star
+              className={collection.isFavorite ? "fill-amber-400 text-amber-400" : ""}
+              aria-hidden="true"
+            />
+            {collection.isFavorite ? "Unfavorite" : "Favorite"}
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
             <Trash2 aria-hidden="true" />

@@ -7,6 +7,7 @@ import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
   getItemTypeBySlug,
+  toggleItemFavorite as toggleItemFavoriteQuery,
   updateItem as updateItemQuery,
   type ItemDetail,
 } from "@/lib/db/items";
@@ -137,4 +138,20 @@ export async function deleteItem(
   }
 
   return { success: true };
+}
+
+export async function toggleItemFavorite(
+  itemId: string
+): Promise<{ success: true; isFavorite: boolean } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const isFavorite = await toggleItemFavoriteQuery(itemId, session.user.id);
+  if (isFavorite === null) {
+    return { success: false, error: "Item not found" };
+  }
+
+  return { success: true, isFavorite };
 }

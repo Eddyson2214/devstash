@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { deleteItem, updateItem } from "@/actions/items";
+import { deleteItem, toggleItemFavorite, updateItem } from "@/actions/items";
 import { ItemDrawerActions } from "@/components/items/ItemDrawerActions";
 import { ItemEditForm, type EditFormState } from "@/components/items/ItemEditForm";
 import { ItemViewContent } from "@/components/items/ItemViewContent";
@@ -40,6 +40,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
 
   const editing = form !== null && form.id === itemId;
   const { collections, loading: collectionsLoading } = useCollections(editing);
@@ -135,6 +136,22 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
     router.refresh();
   }
 
+  async function handleToggleFavorite() {
+    if (!item) return;
+
+    setTogglingFavorite(true);
+    const response = await toggleItemFavorite(item.id);
+    setTogglingFavorite(false);
+
+    if (!response.success) {
+      toast.error(response.error);
+      return;
+    }
+
+    setItem({ ...item, isFavorite: response.isFavorite });
+    router.refresh();
+  }
+
   const copyText = item?.content ?? item?.url ?? "";
 
   return (
@@ -161,6 +178,8 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
               onCancelEdit={cancelEdit}
               onStartEdit={startEdit}
               onDelete={handleDelete}
+              onToggleFavorite={handleToggleFavorite}
+              togglingFavorite={togglingFavorite}
             />
 
             <div className="flex flex-col gap-6 p-4">

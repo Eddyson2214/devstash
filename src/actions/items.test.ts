@@ -9,6 +9,7 @@ vi.mock("@/lib/db/items", () => ({
   deleteItem: vi.fn(),
   createItem: vi.fn(),
   getItemTypeBySlug: vi.fn(),
+  toggleItemFavorite: vi.fn(),
 }));
 
 vi.mock("@/lib/r2", () => ({
@@ -21,16 +22,18 @@ import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
   getItemTypeBySlug,
+  toggleItemFavorite as toggleItemFavoriteQuery,
   updateItem as updateItemQuery,
 } from "@/lib/db/items";
 import { deleteFromR2 } from "@/lib/r2";
-import { createItem, deleteItem, updateItem } from "@/actions/items";
+import { createItem, deleteItem, toggleItemFavorite, updateItem } from "@/actions/items";
 
 const mockedAuth = vi.mocked(auth);
 const mockedUpdateItemQuery = vi.mocked(updateItemQuery);
 const mockedDeleteItemQuery = vi.mocked(deleteItemQuery);
 const mockedCreateItemQuery = vi.mocked(createItemQuery);
 const mockedGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
+const mockedToggleItemFavoriteQuery = vi.mocked(toggleItemFavoriteQuery);
 const mockedDeleteFromR2 = vi.mocked(deleteFromR2);
 
 const validInput = {
@@ -337,5 +340,38 @@ describe("createItem", () => {
         fileSize: 2048,
       })
     );
+  });
+});
+
+describe("toggleItemFavorite", () => {
+  it("rejects when there is no session", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await toggleItemFavorite("item-1");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedToggleItemFavoriteQuery).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the item doesn't exist or isn't owned by the session user", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleItemFavoriteQuery.mockResolvedValue(null);
+
+    const result = await toggleItemFavorite("item-1");
+
+    expect(result).toEqual({ success: false, error: "Item not found" });
+  });
+
+  it("toggles the item's favorite state and returns the new value", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1" } });
+    mockedToggleItemFavoriteQuery.mockResolvedValue(true);
+
+    const result = await toggleItemFavorite("item-1");
+
+    expect(result).toEqual({ success: true, isFavorite: true });
+    expect(mockedToggleItemFavoriteQuery).toHaveBeenCalledWith("item-1", "user-1");
   });
 });

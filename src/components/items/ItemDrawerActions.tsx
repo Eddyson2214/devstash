@@ -34,6 +34,8 @@ interface ItemDrawerActionsProps {
   onCancelEdit: () => void;
   onStartEdit: () => void;
   onDelete: () => void;
+  onToggleFavorite: () => void;
+  togglingFavorite: boolean;
 }
 
 export function ItemDrawerActions({
@@ -51,6 +53,8 @@ export function ItemDrawerActions({
   onCancelEdit,
   onStartEdit,
   onDelete,
+  onToggleFavorite,
+  togglingFavorite,
 }: ItemDrawerActionsProps) {
   const Icon = TYPE_ICONS[item.itemType.icon];
 
@@ -82,7 +86,7 @@ export function ItemDrawerActions({
         </div>
       ) : (
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" disabled title="Coming soon">
+          <Button variant="ghost" size="sm" onClick={onToggleFavorite} disabled={togglingFavorite}>
             <Star
               className={item.isFavorite ? "fill-amber-400 text-amber-400" : ""}
               aria-hidden="true"

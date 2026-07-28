@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { toggleCollectionFavorite } from "@/actions/collections";
 import { DeleteCollectionDialog } from "@/components/collections/DeleteCollectionDialog";
 import { EditCollectionDialog } from "@/components/collections/EditCollectionDialog";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ export function CollectionDetailActions({ collection }: CollectionDetailActionsP
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [togglingFavorite, setTogglingFavorite] = useState(false);
 
   function handleUpdated() {
     router.refresh();
@@ -26,9 +29,27 @@ export function CollectionDetailActions({ collection }: CollectionDetailActionsP
     router.push("/collections");
   }
 
+  async function handleToggleFavorite() {
+    setTogglingFavorite(true);
+    const response = await toggleCollectionFavorite(collection.id);
+    setTogglingFavorite(false);
+
+    if (!response.success) {
+      toast.error(response.error);
+      return;
+    }
+
+    router.refresh();
+  }
+
   return (
     <div className="flex items-center gap-1">
-      <Button variant="ghost" size="sm" disabled title="Coming soon">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleToggleFavorite}
+        disabled={togglingFavorite}
+      >
         <Star
           className={collection.isFavorite ? "fill-amber-400 text-amber-400" : ""}
           aria-hidden="true"

@@ -334,6 +334,22 @@ export async function deleteItem(
   return { fileUrl: existing.fileUrl };
 }
 
+export async function toggleItemFavorite(id: string, userId: string): Promise<boolean | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id, userId },
+    select: { isFavorite: true },
+  });
+  if (!existing) return null;
+
+  const updated = await prisma.item.update({
+    where: { id },
+    data: { isFavorite: !existing.isFavorite },
+    select: { isFavorite: true },
+  });
+
+  return updated.isFavorite;
+}
+
 export interface SearchableItem {
   id: string;
   title: string;
