@@ -1,13 +1,23 @@
-# Current Feature
-<!--Feature name and short description -->
+# Current Feature: Homepage
+
+Rebuild the marketing homepage (`prototypes/homepage/` mockup) as the real `src/app/page.tsx`, using proper server/client components, Tailwind v4 + shadcn, and working navigation. Full spec: `context/features/homepage-spec.md`.
 
 ## Status
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- Replace placeholder `src/app/page.tsx` with the real homepage, composed from new components in `src/components/homepage/`
+- Split into server components (static sections) and client components (interactivity): `Navbar`/`NavbarScroll`, `Hero`/`HeroVisual`, `Features`, `AiSection`, `PricingSection`, `CtaSection`, `Footer`, reusable `FadeIn` scroll-reveal wrapper
+- Match mockup sections/copy/layout: nav, hero (chaos-to-order visual with animated icons), features grid, AI section, pricing (with monthly/yearly toggle), CTA, footer
+- Port `script.js` animations to React: chaos-icon drift/bounce/mouse-repel physics loop, navbar opacity-on-scroll, scroll fade-in via `IntersectionObserver`, pricing toggle state
+- Use Tailwind v4 + shadcn `Button` etc., matching the rest of the app; use the canonical item-type color palette from `project-overview.md` (not the mockup's standalone palette) for feature-card accents
+- All buttons/links resolve to real routes: Sign In → `/sign-in`, Get Started/Upgrade to Pro/CTA → `/register`, Features/Pricing → in-page anchors; footer About/Blog/Privacy/Terms have no pages yet, leave non-navigating rather than inventing routes
+- Keep code clean and DRY (e.g. shared `FadeIn` wrapper instead of per-section observer logic)
 
 ## Notes
-<!-- Any extra notes -->
+- Full component breakdown, styling rules, link/route table, and animation porting notes are in `context/features/homepage-spec.md` — refer to it during implementation rather than duplicating here
+- `prototypes/homepage/` stays as-is as a reference; this feature only adds `src/app/page.tsx` + `src/components/homepage/*`
+- No auth-aware behavior, no new About/Blog/Privacy/Terms pages — explicitly out of scope per the spec
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
