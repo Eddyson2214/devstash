@@ -240,6 +240,28 @@ export async function deleteCollection(id: string, userId: string): Promise<bool
   return result.count > 0;
 }
 
+export interface FavoriteCollection {
+  id: string;
+  name: string;
+  updatedAt: Date;
+  itemCount: number;
+}
+
+export async function getFavoriteCollectionsForUser(userId: string): Promise<FavoriteCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, name: true, updatedAt: true, _count: { select: { items: true } } },
+  });
+
+  return collections.map((collection) => ({
+    id: collection.id,
+    name: collection.name,
+    updatedAt: collection.updatedAt,
+    itemCount: collection._count.items,
+  }));
+}
+
 export async function getCollectionStats(): Promise<CollectionStats> {
   const userId = await getDemoUserId();
   if (!userId) return { total: 0, favorites: 0 };

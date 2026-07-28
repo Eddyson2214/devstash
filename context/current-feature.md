@@ -1,14 +1,28 @@
-# Current Feature
+# Current Feature: Favorites Page
 <!--Feature name and short description -->
+Add a /favorites page displaying all favorited items and collections in a compact, dev-focused list.
 
 ## Status
 
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Add star icon button to TopBar linking to /favorites
+- Create /favorites route with protection (session-scoped, redirect to /sign-in like /dashboard, /collections, /settings)
+- Fetch all of the signed-in user's favorited items and collections (isFavorite: true)
+- Compact list view (VS Code/terminal style, not cards)
+- Each row: type icon, title, type badge, date added
+- Separate sections for items and collections with counts
+- Click item opens ItemDrawer (reuse ItemDrawerProvider), click collection navigates to /collections/[id]
+- Empty state when no favorites
+- Sort by most recently favorited (updatedAt)
 
 ## Notes
 <!-- Any extra notes -->
+- Both `Item.isFavorite` and `Collection.isFavorite` fields already exist in the schema and are already read elsewhere (ItemCard pin/favorite indicators, sidebar's Favorite Collections), but toggling favorite on/off is still a disabled "Coming soon" stub in both `ItemDrawerActions` and `CollectionActionsMenu` — this spec only covers displaying existing favorites, not adding the toggle. Flagging in case the user wants the toggle wired up as part of this feature or as a fast follow.
+- UI style: monospace/semi-monospace font, minimal padding, high density, subtle hover states, no cards or heavy borders — a deliberate departure from the card-based look used elsewhere in the app (ItemCard, CollectionCard).
+- Should follow the session-scoped query pattern (userId threaded through, no hardcoded demo user) established since the Session-Scoped Item Reads feature — new queries should not reintroduce that tech debt.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

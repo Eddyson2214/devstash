@@ -137,6 +137,26 @@ export async function getItemsByType(userId: string, itemTypeId: string): Promis
   return items.map(toDashboardItem);
 }
 
+export interface FavoriteItem {
+  id: string;
+  title: string;
+  updatedAt: Date;
+  itemType: DashboardItemType;
+}
+
+export async function getFavoriteItems(userId: string): Promise<FavoriteItem[]> {
+  return prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      updatedAt: true,
+      itemType: { select: { id: true, name: true, icon: true, color: true } },
+    },
+  });
+}
+
 export async function getItemsByCollection(
   userId: string,
   collectionId: string

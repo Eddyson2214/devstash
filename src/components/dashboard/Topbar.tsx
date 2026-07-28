@@ -1,11 +1,13 @@
 "use client";
 
-import { Search } from "lucide-react";
+import Link from "next/link";
+import { Search, Star } from "lucide-react";
 
 import type { CreatableItemType } from "@/actions/items";
 import { NewCollectionDialog } from "@/components/dashboard/NewCollectionDialog";
 import { NewItemDialog } from "@/components/items/NewItemDialog";
 import { useCommandPalette } from "@/components/search/CommandPaletteProvider";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -35,6 +37,15 @@ export function Topbar({ defaultItemType }: TopbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          nativeButton={false}
+          render={<Link href="/favorites" />}
+        >
+          <Star aria-hidden="true" />
+          <span className="sr-only">Favorites</span>
+        </Button>
         <NewCollectionDialog />
         <NewItemDialog defaultType={defaultItemType} />
       </div>
