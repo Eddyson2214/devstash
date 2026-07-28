@@ -4,9 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
-import { FavoriteCollectionRow } from "@/components/favorites/FavoriteCollectionRow";
-import { FavoriteItemRow } from "@/components/favorites/FavoriteItemRow";
-import { FavoritesSection } from "@/components/favorites/FavoritesSection";
+import { FavoritesList } from "@/components/favorites/FavoritesList";
 import { ItemDrawerProvider } from "@/components/items/ItemDrawerProvider";
 import { CommandPaletteProvider } from "@/components/search/CommandPaletteProvider";
 import { EditorPreferencesProvider } from "@/components/settings/EditorPreferencesProvider";
@@ -72,25 +70,10 @@ export default async function FavoritesPage() {
                   </p>
                 </div>
 
-                <FavoritesSection
-                  title="Items"
-                  count={favoriteItems.length}
-                  emptyMessage="No favorite items yet."
-                >
-                  {favoriteItems.map((item) => (
-                    <FavoriteItemRow key={item.id} item={item} />
-                  ))}
-                </FavoritesSection>
-
-                <FavoritesSection
-                  title="Collections"
-                  count={favoriteCollections.length}
-                  emptyMessage="No favorite collections yet."
-                >
-                  {favoriteCollections.map((collection) => (
-                    <FavoriteCollectionRow key={collection.id} collection={collection} />
-                  ))}
-                </FavoritesSection>
+                <FavoritesList
+                  favoriteItems={favoriteItems}
+                  favoriteCollections={favoriteCollections}
+                />
               </main>
             </SidebarInset>
           </SidebarProvider>
