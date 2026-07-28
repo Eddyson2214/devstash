@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DevStash — One Hub for All Your Developer Knowledge</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <span class="logo-mark">DS</span>
+        DevStash
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-actions">
+        <a href="#" class="btn btn-ghost">Sign In</a>
+        <a href="#" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-text fade-in">
+      <span class="eyebrow">Built for developers</span>
+      <h1>Stop Losing Your <span class="gradient-text">Developer Knowledge</span></h1>
+      <p class="subheadline">
+        Snippets, prompts, commands, notes, files, and links — scattered across a dozen apps.
+        DevStash brings all of it into one fast, searchable, AI-enhanced hub.
+      </p>
+      <div class="hero-cta">
+        <a href="#pricing" class="btn btn-primary btn-lg">Get Started Free</a>
+        <a href="#features" class="btn btn-secondary btn-lg">See How It Works</a>
+      </div>
+    </div>
+
+    <div class="hero-visual fade-in">
+      <div class="chaos-container">
+        <span class="visual-label">Your knowledge today...</span>
+        <div class="chaos-icons" id="chaosIcons">
+          <div class="chaos-icon" data-label="Notion">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <rect x="8" y="7" width="3" height="3" rx="0.5"/>
+              <line x1="13" y1="8.5" x2="16" y2="8.5"/>
+              <rect x="8" y="12" width="3" height="3" rx="0.5"/>
+              <line x1="13" y1="13.5" x2="16" y2="13.5"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="GitHub">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="3" x2="6" y2="15"/>
+              <circle cx="18" cy="6" r="3"/>
+              <circle cx="6" cy="18" r="3"/>
+              <path d="M18 9a9 9 0 0 1-9 9"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="Slack">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="5" width="16" height="12" rx="3"/>
+              <polygon points="9,17 13,17 9,21" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="VS Code">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 8 4 12 9 16"/>
+              <polyline points="15 8 20 12 15 16"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="Browser Tabs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="5" width="18" height="14" rx="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <circle cx="6.5" cy="7" r="0.6" fill="currentColor" stroke="none"/>
+              <circle cx="9" cy="7" r="0.6" fill="currentColor" stroke="none"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="Terminal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="2"/>
+              <polyline points="7 9 11 12 7 15"/>
+              <line x1="12" y1="15" x2="16" y2="15"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="Text File">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+              <polyline points="13 3 13 8 18 8"/>
+              <line x1="8" y1="13" x2="16" y2="13"/>
+              <line x1="8" y1="17" x2="13" y2="17"/>
+            </svg>
+          </div>
+          <div class="chaos-icon" data-label="Bookmark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v16l-6-3.5L6 20V4z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="transform-arrow" id="transformArrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="12" x2="20" y2="12"/>
+          <polyline points="14 6 20 12 14 18"/>
+        </svg>
+      </div>
+
+      <div class="dashboard-preview">
+        <span class="visual-label">...with DevStash</span>
+        <div class="mini-dashboard">
+          <div class="mini-sidebar">
+            <div class="mini-sidebar-item mini-sidebar-active"></div>
+            <div class="mini-sidebar-item"></div>
+            <div class="mini-sidebar-item"></div>
+            <div class="mini-sidebar-item"></div>
+            <div class="mini-sidebar-item"></div>
+          </div>
+          <div class="mini-grid">
+            <div class="mini-card" style="--card-color:#3b82f6"></div>
+            <div class="mini-card" style="--card-color:#f59e0b"></div>
+            <div class="mini-card" style="--card-color:#06b6d4"></div>
+            <div class="mini-card" style="--card-color:#22c55e"></div>
+            <div class="mini-card" style="--card-color:#ec4899"></div>
+            <div class="mini-card" style="--card-color:#6366f1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features -->
+  <section id="features" class="features">
+    <div class="section-heading fade-in">
+      <h2>Everything you capture, in one place</h2>
+      <p>Seven ways to save what matters, unified under one fast search.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-in" style="--accent:#3b82f6">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 8 4 12 9 16"/>
+            <polyline points="15 8 20 12 15 16"/>
+          </svg>
+        </div>
+        <h3>Code Snippets</h3>
+        <p>Save reusable code with syntax highlighting for every language you work in.</p>
+      </div>
+      <div class="feature-card fade-in" style="--accent:#f59e0b">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l1.9 5.9L20 11l-6.1 2.1L12 19l-1.9-5.9L4 11l6.1-2.1L12 3z"/>
+          </svg>
+        </div>
+        <h3>AI Prompts</h3>
+        <p>Store and organize the prompts you actually reuse, instead of digging through chat history.</p>
+      </div>
+      <div class="feature-card fade-in" style="--accent:#22c55e">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <h3>Instant Search</h3>
+        <p>Find anything across content, tags, titles, and types in a fraction of a second.</p>
+      </div>
+      <div class="feature-card fade-in" style="--accent:#06b6d4">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <polyline points="7 9 11 12 7 15"/>
+            <line x1="12" y1="15" x2="16" y2="15"/>
+          </svg>
+        </div>
+        <h3>Commands</h3>
+        <p>Keep the terminal commands you always forget one search away, no more digging through history.</p>
+      </div>
+      <div class="feature-card fade-in" style="--accent:#64748b">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+            <polyline points="13 3 13 8 18 8"/>
+          </svg>
+        </div>
+        <h3>Files &amp; Docs</h3>
+        <p>Upload files and images so context lives right next to the rest of your knowledge.</p>
+      </div>
+      <div class="feature-card fade-in" style="--accent:#6366f1">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <h3>Collections</h3>
+        <p>Group any mix of item types into collections — a snippet and a prompt can live side by side.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Section -->
+  <section class="ai-section">
+    <div class="ai-content fade-in">
+      <span class="badge badge-pro">Pro Feature</span>
+      <h2>Let AI do the busywork</h2>
+      <p>Stop manually tagging and summarizing everything you save. DevStash Pro does it for you.</p>
+      <ul class="ai-checklist">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          AI auto-tag suggestions
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Instant AI summaries
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          "Explain this code" on demand
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          AI prompt optimizer
+        </li>
+      </ul>
+    </div>
+    <div class="ai-demo fade-in">
+      <div class="code-window">
+        <div class="code-window-header">
+          <div class="window-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="code-window-title">debounce.ts</span>
+        </div>
+        <div class="code-window-body">
+          <pre><code><span class="tok-kw">function</span> <span class="tok-fn">debounce</span>(fn, delay) {
+  <span class="tok-kw">let</span> timer;
+  <span class="tok-kw">return</span> (...args) =&gt; {
+    <span class="tok-fn">clearTimeout</span>(timer);
+    timer = <span class="tok-fn">setTimeout</span>(() =&gt; fn(...args), delay);
+  };
+}</code></pre>
+          <div class="ai-tags-demo">
+            <span class="ai-tag-label">AI Generated Tags</span>
+            <div class="ai-tags">
+              <span class="ai-tag" style="--accent:#3b82f6">typescript</span>
+              <span class="ai-tag" style="--accent:#22c55e">utility</span>
+              <span class="ai-tag" style="--accent:#f59e0b">performance</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="pricing">
+    <div class="section-heading fade-in">
+      <h2>Simple, transparent pricing</h2>
+      <p>Start free. Upgrade when you need unlimited space and AI features.</p>
+    </div>
+
+    <div class="pricing-toggle fade-in">
+      <span class="toggle-option toggle-option-active" data-period="monthly">Monthly</span>
+      <button class="toggle-switch" id="billingToggle" aria-label="Toggle yearly billing" aria-pressed="false">
+        <span class="toggle-knob"></span>
+      </button>
+      <span class="toggle-option" data-period="yearly">
+        Yearly <span class="save-badge">Save 25%</span>
+      </span>
+    </div>
+
+    <div class="pricing-grid fade-in">
+      <div class="pricing-card">
+        <h3>Free</h3>
+        <p class="pricing-desc">Everything you need to get organized.</p>
+        <div class="price">
+          <span class="price-amount">$0</span>
+          <span class="price-period">/forever</span>
+        </div>
+        <ul class="pricing-features">
+          <li>50 items total</li>
+          <li>3 collections</li>
+          <li>All system types except File &amp; Image</li>
+          <li>Basic search</li>
+          <li>Standard support</li>
+        </ul>
+        <a href="#" class="btn btn-secondary btn-block">Get Started Free</a>
+      </div>
+
+      <div class="pricing-card pricing-card-featured">
+        <span class="popular-badge">Most Popular</span>
+        <h3>Pro</h3>
+        <p class="pricing-desc">For developers who save everything.</p>
+        <div class="price">
+          <span class="price-amount" data-monthly="$8" data-yearly="$72">$8</span>
+          <span class="price-period" data-monthly="/mo" data-yearly="/yr">/mo</span>
+        </div>
+        <ul class="pricing-features">
+          <li>Unlimited items</li>
+          <li>Unlimited collections</li>
+          <li>All system types, including File &amp; Image</li>
+          <li>AI auto-tagging, summaries &amp; more</li>
+          <li>JSON / ZIP data export</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="btn btn-primary btn-block">Upgrade to Pro</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta fade-in">
+    <h2>Ready to organize your knowledge?</h2>
+    <p>Join developers who stopped losing snippets, prompts, and commands to scattered tabs.</p>
+    <a href="#pricing" class="btn btn-primary btn-lg">Get Started Free</a>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <span class="logo-mark">DS</span>
+          DevStash
+        </a>
+        <p>One hub for all your developer knowledge.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; <span id="year"></span> DevStash. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
