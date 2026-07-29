@@ -48,7 +48,7 @@ export default async function DashboardPage() {
     getFavoriteCollections(),
     getRecentCollections(RECENT_COLLECTIONS_LIMIT),
     getItemStats(userId),
-    getCollectionStats(),
+    getCollectionStats(userId),
     getEditorPreferences(userId),
   ]);
 

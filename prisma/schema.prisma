@@ -61,9 +61,12 @@ model User {
   editorPreferences Json? // fontSize/tabSize/wordWrap/minimap/theme; null resolves to hard defaults on read
 
   // Billing
-  isPro                Boolean @default(false)
-  stripeCustomerId     String? @unique
-  stripeSubscriptionId String? @unique
+  isPro                  Boolean   @default(false)
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  subscriptionStatus     String?
 
   // Relations
   accounts    Account[]

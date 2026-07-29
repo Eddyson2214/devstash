@@ -278,10 +278,7 @@ export async function getFavoriteCollectionsForUser(userId: string): Promise<Fav
   }));
 }
 
-export async function getCollectionStats(): Promise<CollectionStats> {
-  const userId = await getDemoUserId();
-  if (!userId) return { total: 0, favorites: 0 };
-
+export async function getCollectionStats(userId: string): Promise<CollectionStats> {
   const [total, favorites] = await Promise.all([
     prisma.collection.count({ where: { userId } }),
     prisma.collection.count({ where: { userId, isFavorite: true } }),

@@ -20,9 +20,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub;
         const user = await prisma.user.findUnique({
           where: { id: token.sub },
-          select: { emailVerified: true },
+          select: { emailVerified: true, isPro: true },
         });
         session.user.emailVerified = user?.emailVerified ?? null;
+        session.user.isPro = user?.isPro ?? false;
       }
       return session;
     },

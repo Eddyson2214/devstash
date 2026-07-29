@@ -1,13 +1,31 @@
-# Current Feature
+# Current Feature: Stripe Integration - Phase 1 (Core Infrastructure)
 <!--Feature name and short description -->
+Billing plumbing DevStash Pro needs before any checkout/webhook flow exists — schema fields, Stripe client singleton, billing query layer, pure usage-limits module, and `isPro` in the session. No live Stripe API calls in this phase.
 
 ## Status
+In Progress
 
 ## Goals
 <!-- Goals and requirements -->
+- Fix prerequisite bug: `getCollectionStats()` in `src/lib/db/collections.ts` takes a hardcoded `getDemoUserId()` instead of a `userId` param — change signature to `getCollectionStats(userId: string)` and update its dashboard-stats call site.
+- Add `stripePriceId`, `stripeCurrentPeriodEnd`, `subscriptionStatus` fields to `User` via a real Prisma migration (`prisma migrate dev --name add_stripe_subscription_fields`, never `db push`). `isPro`/`stripeCustomerId`/`stripeSubscriptionId` already exist.
+- Install the `stripe` npm package (server SDK only, no `@stripe/stripe-js` this phase).
+- Create `src/lib/stripe.ts` — Stripe client singleton (same module-scope-singleton pattern as `src/lib/prisma.ts`/`rate-limit.ts`) plus `STRIPE_PRICE_IDS` (monthly/yearly from env).
+- Create `src/lib/db/billing.ts` — billing query layer with `BillingInfo` interface and `getBillingInfo`, `setStripeCustomerId`, `syncSubscriptionFromStripe` (upsert by stripeCustomerId, used by Phase 2's webhook), `countItemsForUser`, `countCollectionsForUser` (deliberately separate from `getItemStats`/`getCollectionStats`).
+- Create `src/lib/limits.ts` — pure usage-limits module (no Prisma/Stripe imports): `FREE_ITEM_LIMIT=50`, `FREE_COLLECTION_LIMIT=3`, `isLimitEnforcementEnabled()` (reads `BILLING_LIMITS_ENABLED`, default off), `hasReachedItemLimit`, `hasReachedCollectionLimit`.
+- `src/lib/limits.test.ts` — unit tests for `isLimitEnforcementEnabled` defaults/exact-match, and both limit-check functions (below/at/above limit, always false for Pro).
+- Extend the existing `session` callback's `select` in `src/auth.ts` to also fetch `isPro` (no new `jwt` callback, no second DB query).
+- Extend `Session.user` in `src/types/next-auth.d.ts` with `isPro: boolean`.
+- Add `BILLING_LIMITS_ENABLED=false` to `.env`; verify (don't recreate) `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_PRICE_ID_MONTHLY`, `STRIPE_PRICE_ID_YEARLY` already exist.
 
 ## Notes
 <!-- Any extra notes -->
+- Schema/plumbing/unit-tests only — nothing talks to the live Stripe API, no `stripe listen` needed, no browser/Playwright walkthrough (nothing user-facing changes). Spot-check `session.user.isPro` by logging server-side during a normal signed-in page load.
+- Limit enforcement stays off by default per project-overview.md's dev-mode note; this phase only builds `limits.ts`, does not wire it into `createItem`/`createCollection` (Phase 2's feature-gating work).
+- `npm run build` — re-check `○`/`ƒ` markers for `/`, `/register`, etc. don't regress (a prior feature regressed public-page static generation via an unrelated root-layout `auth()` call; this session callback change is isolated to logic already run on every authenticated request, so should be a non-issue).
+- `prisma migrate status` must be clean after the migration.
+- Pin the Stripe SDK's `apiVersion` in `src/lib/stripe.ts` to whatever the installed `stripe` package version expects.
+- Full spec: `context/features/stripe-integration-phase-1-spec.md`. Background research: `docs/stripe-integration-plan.md`.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
