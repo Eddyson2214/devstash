@@ -13,9 +13,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface TopbarProps {
   defaultItemType?: CreatableItemType;
+  isPro?: boolean;
 }
 
-export function Topbar({ defaultItemType }: TopbarProps) {
+export function Topbar({ defaultItemType, isPro }: TopbarProps) {
   const { openCommandPalette } = useCommandPalette();
 
   return (
@@ -37,6 +38,11 @@ export function Topbar({ defaultItemType }: TopbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        {!isPro && (
+          <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/upgrade" />}>
+            Upgrade
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon-sm"

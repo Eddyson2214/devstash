@@ -68,7 +68,7 @@ export default async function DashboardPage() {
               }}
             />
             <SidebarInset>
-              <Topbar />
+              <Topbar isPro={session.user.isPro} />
               <main className="flex flex-1 flex-col gap-8 p-6">
                 {session?.user && !session.user.emailVerified && <VerifyEmailBanner />}
 

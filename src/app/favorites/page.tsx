@@ -60,7 +60,7 @@ export default async function FavoritesPage() {
               }}
             />
             <SidebarInset>
-              <Topbar />
+              <Topbar isPro={session.user.isPro} />
               <main className="flex flex-1 flex-col gap-6 p-6">
                 <div>
                   <h2 className="text-2xl font-bold">Favorites</h2>

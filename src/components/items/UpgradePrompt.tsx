@@ -23,7 +23,7 @@ export function UpgradePrompt({ itemTypeName }: UpgradePromptProps) {
             Upgrade to Pro to upload and store {typeLabel}s in DevStash.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/settings" />} className="mt-2">
+        <Button nativeButton={false} render={<Link href="/upgrade" />} className="mt-2">
           Upgrade to Pro
         </Button>
       </CardContent>

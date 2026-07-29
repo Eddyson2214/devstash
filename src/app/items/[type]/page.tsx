@@ -81,7 +81,7 @@ export default async function ItemTypePage({
               }}
             />
             <SidebarInset>
-              <Topbar defaultItemType={defaultItemType} />
+              <Topbar defaultItemType={defaultItemType} isPro={session.user.isPro} />
               <main className="flex flex-1 flex-col gap-8 p-6">
                 {isGated ? (
                   <div className="flex flex-1 items-center justify-center">

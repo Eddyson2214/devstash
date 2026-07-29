@@ -65,7 +65,7 @@ export default async function CollectionDetailPage({
               }}
             />
             <SidebarInset>
-              <Topbar />
+              <Topbar isPro={session.user.isPro} />
               <main className="flex flex-1 flex-col gap-8 p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div>

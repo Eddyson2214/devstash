@@ -52,7 +52,7 @@ export default async function CollectionsPage() {
               }}
             />
             <SidebarInset>
-              <Topbar />
+              <Topbar isPro={session.user.isPro} />
               <main className="flex flex-1 flex-col gap-8 p-6">
                 <div>
                   <h2 className="text-2xl font-bold">Collections</h2>
