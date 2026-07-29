@@ -1,12 +1,17 @@
-# Current Feature
+# Current Feature: Gate File & Image Pages for Free Users
 
 ## Status
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- In `src/app/items/[type]/page.tsx`, when `itemType.name` is `"File"` or `"Image"` and `!session.user.isPro`, replace the normal page content (header row + `FileList`/`ImageGallery`) with a new `UpgradePrompt` component — the `AppSidebar`/`Topbar` shell stays so the user can still navigate away.
+- New `src/components/items/UpgradePrompt.tsx` — a centered `Card`-based message explaining that File/Image storage is a Pro feature, with a button linking to `/settings` (where the existing `BillingCard` already handles real checkout) rather than duplicating `createCheckoutSession` wiring in a second place.
+- Pro users see the page exactly as today (`FileList`/`ImageGallery`, "New File"/"New Image" button, etc.) — this only changes what free users see when visiting those two routes directly or via the sidebar links.
 
 ## Notes
-<!-- Any extra notes -->
+- This is the first place in the app that actually locks a Pro feature behind `isPro` for page access — everything else (`limits.ts`, upload gating) has deliberately stayed unlocked-in-dev per `project-overview.md`'s dev-mode note. Confirmed with the user this is an intentional, explicit exception for this feature, not a broader policy change.
+- Out of scope, flagged for awareness: the global "New Item" dialog (`Topbar`) still lets a free user pick File/Image as a type and upload — this feature only gates the `/items/files` and `/items/images` *pages*, not the creation path. Leaving as-is unless asked to close that gap too.
+- Sidebar link/counts for File/Image are unchanged — they still show real counts and still link to these routes; only the destination content changes for free users.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->
