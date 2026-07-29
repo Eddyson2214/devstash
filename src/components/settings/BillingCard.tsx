@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { createBillingPortalSession, createCheckoutSession } from "@/actions/billing";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { BillingInfo } from "@/lib/db/billing";
 
@@ -51,15 +52,21 @@ export function BillingCard({ billingInfo }: BillingCardProps) {
   }
 
   if (billingInfo.isPro) {
+    const details = [
+      billingInfo.subscriptionStatus === "trialing" ? "Trial" : null,
+      billingInfo.currentPeriodEnd ? `Renews ${formatDate(billingInfo.currentPeriodEnd)}` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
     return (
       <div className="flex flex-col gap-4">
         <div>
           <p className="text-sm font-medium">Current Plan</p>
-          <p className="text-sm text-muted-foreground">
-            Pro
-            {billingInfo.subscriptionStatus === "trialing" ? " · Trial" : ""}
-            {billingInfo.currentPeriodEnd ? ` · Renews ${formatDate(billingInfo.currentPeriodEnd)}` : ""}
-          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <Badge>Pro</Badge>
+            {details && <span className="text-sm text-muted-foreground">{details}</span>}
+          </div>
         </div>
         <Button onClick={handleManage} disabled={pendingAction !== null} className="self-start">
           {pendingAction === "manage" ? "Loading..." : "Manage Subscription"}
