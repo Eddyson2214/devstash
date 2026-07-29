@@ -1,13 +1,23 @@
-# Current Feature
-<!--Feature name and short description -->
+# Current Feature: Stripe Integration - Phase 2 (Integration & UI)
 
 ## Status
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- Two Server Actions in `src/actions/billing.ts`: `createCheckoutSession(interval)` and `createBillingPortalSession()`, both `auth()`-guarded, following the `{ success, data | error }` pattern, creating/reusing `stripeCustomerId` (via `stripe.customers.create` + Phase 1's `setStripeCustomerId`) and returning a redirect `url` from Stripe's server-redirect checkout/portal flow (no publishable key needed client-side).
+- Webhook route `src/app/api/webhooks/stripe/route.ts` — the one route that deliberately skips `auth()`, verifying the `stripe-signature` header via `stripe.webhooks.constructEvent` against the raw `request.text()` body, and routing `checkout.session.completed` / `customer.subscription.created` / `updated` / `deleted` through one shared sync path calling Phase 1's `syncSubscriptionFromStripe` (deriving `isPro` from `status === "active" || "trialing"`).
+- Wire Phase 1's `limits.ts` into `createItem` (`src/actions/items.ts`) and `createCollection` (`src/actions/collections.ts`): right after the `auth()` guard, if `isLimitEnforcementEnabled()` and `!session.user.isPro`, check `countItemsForUser`/`countCollectionsForUser` against `hasReachedItemLimit`/`hasReachedCollectionLimit` and short-circuit with `{ success: false, error }` before Zod validation.
+- New `src/components/settings/BillingCard.tsx` client component — Free state shows "Upgrade to Pro" (monthly/yearly → `createCheckoutSession`), Pro state shows plan/status/renewal date + "Manage Subscription" (→ `createBillingPortalSession`), toasting results like `ChangePasswordForm`/`EditorPreferencesForm`.
+- `src/app/settings/page.tsx` fetches `getBillingInfo(session.user.id)` alongside the existing `Promise.all`, rendering `BillingCard` between the Account and Editor Preferences cards (same `Card`/`CardHeader`/`Separator`/`CardContent` structure).
+- Stripe Dashboard configuration: verify monthly/yearly recurring prices, local `stripe listen` webhook secret, production webhook endpoint subscribed to the four events above, Customer Portal enabled (cancel, switch price, update payment method), test-mode keys confirmed for local/dev.
+- `.env`/`.env.production` gain `STRIPE_WEBHOOK_SECRET`; `BILLING_LIMITS_ENABLED` stays `false` by default — only flip to `true` as a deliberate, separate decision, not as a side effect of merging this phase.
 
 ## Notes
-<!-- Any extra notes -->
+- Depends on Phase 1 (already merged on `master`): `src/lib/stripe.ts`, `src/lib/db/billing.ts` (`getBillingInfo`/`setStripeCustomerId`/`syncSubscriptionFromStripe`/`countItemsForUser`/`countCollectionsForUser`), `src/lib/limits.ts` (`isLimitEnforcementEnabled`/`hasReachedItemLimit`/`hasReachedCollectionLimit`), and `session.user.isPro`.
+- Full research backing this spec is in `docs/stripe-integration-plan.md` (currently uncommitted).
+- This phase requires live Stripe API calls and `stripe listen --forward-to localhost:3000/api/webhooks/stripe` running locally — cannot be fully verified with unit tests alone. Testing checklist (11 items) is in `context/features/stripe-integration-phase-2-spec.md#testing`, covering: build/test pass, Free/Pro Billing card states, monthly + yearly checkout with test card `4242 4242 4242 4242`, webhook-driven DB sync verified via Neon MCP, Customer Portal cancellation and its webhook resolving `isPro` correctly (grace-period behavior needs a decision), limit enforcement blocking a 51st item/4th collection for free users when `BILLING_LIMITS_ENABLED=true`, webhook signature rejection (bad/missing header → 400, no DB write), and cleanup of test subscriptions/accounts in both Stripe and Neon `development`.
+- Does NOT retroactively lock down file/image uploads (already unlocked for all users per prior history) — that stays a separate follow-up if/when wanted.
+- Per `project-overview.md`'s dev-mode note, all Pro features stay unlocked for everyone until billing explicitly goes live.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

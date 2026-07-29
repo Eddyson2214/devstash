@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { countCollectionsForUser } from "@/lib/db/billing";
 import {
   createCollection as createCollectionQuery,
   deleteCollection as deleteCollectionQuery,
@@ -12,6 +13,7 @@ import {
   type CollectionOption,
   type CreatedCollection,
 } from "@/lib/db/collections";
+import { FREE_COLLECTION_LIMIT, hasReachedCollectionLimit, isLimitEnforcementEnabled } from "@/lib/limits";
 
 const createCollectionSchema = z.object({
   name: z.string().trim().min(1, "Name is required"),
@@ -26,6 +28,16 @@ export async function createCollection(
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: "Not authenticated" };
+  }
+
+  if (isLimitEnforcementEnabled() && !session.user.isPro) {
+    const collectionCount = await countCollectionsForUser(session.user.id);
+    if (hasReachedCollectionLimit(collectionCount, session.user.isPro)) {
+      return {
+        success: false,
+        error: `Free plan is limited to ${FREE_COLLECTION_LIMIT} collections. Upgrade to Pro for unlimited collections.`,
+      };
+    }
   }
 
   const parsed = createCollectionSchema.safeParse(data);

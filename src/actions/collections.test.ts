@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/auth", () => ({
   auth: vi.fn(),
@@ -12,7 +12,12 @@ vi.mock("@/lib/db/collections", () => ({
   toggleCollectionFavorite: vi.fn(),
 }));
 
+vi.mock("@/lib/db/billing", () => ({
+  countCollectionsForUser: vi.fn(),
+}));
+
 import { auth } from "@/auth";
+import { countCollectionsForUser as countCollectionsForUserQuery } from "@/lib/db/billing";
 import {
   createCollection as createCollectionQuery,
   deleteCollection as deleteCollectionQuery,
@@ -34,6 +39,7 @@ const mockedGetAllCollections = vi.mocked(getAllCollections);
 const mockedUpdateCollectionQuery = vi.mocked(updateCollectionQuery);
 const mockedDeleteCollectionQuery = vi.mocked(deleteCollectionQuery);
 const mockedToggleCollectionFavoriteQuery = vi.mocked(toggleCollectionFavoriteQuery);
+const mockedCountCollectionsForUserQuery = vi.mocked(countCollectionsForUserQuery);
 
 const validInput = {
   name: "React Patterns",
@@ -42,6 +48,10 @@ const validInput = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+afterEach(() => {
+  delete process.env.BILLING_LIMITS_ENABLED;
 });
 
 describe("createCollection", () => {
@@ -63,6 +73,34 @@ describe("createCollection", () => {
 
     expect(result).toEqual({ success: false, error: "Name is required" });
     expect(mockedCreateCollectionQuery).not.toHaveBeenCalled();
+  });
+
+  it("blocks a free user at the collection limit when enforcement is enabled", async () => {
+    process.env.BILLING_LIMITS_ENABLED = "true";
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: false } });
+    mockedCountCollectionsForUserQuery.mockResolvedValue(3);
+
+    const result = await createCollection(validInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "Free plan is limited to 3 collections. Upgrade to Pro for unlimited collections.",
+    });
+    expect(mockedCreateCollectionQuery).not.toHaveBeenCalled();
+  });
+
+  it("does not enforce the collection limit for a Pro user", async () => {
+    process.env.BILLING_LIMITS_ENABLED = "true";
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    const created = { id: "collection-1", name: "React Patterns", description: null };
+    mockedCreateCollectionQuery.mockResolvedValue(created);
+
+    const result = await createCollection(validInput);
+
+    expect(result).toEqual({ success: true, data: created });
+    expect(mockedCountCollectionsForUserQuery).not.toHaveBeenCalled();
   });
 
   it("creates the collection and returns it on success", async () => {

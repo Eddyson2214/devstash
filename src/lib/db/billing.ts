@@ -35,6 +35,15 @@ export async function setStripeCustomerId(userId: string, stripeCustomerId: stri
   });
 }
 
+export async function getStripeCustomerId(userId: string): Promise<string | null> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { stripeCustomerId: true },
+  });
+
+  return user?.stripeCustomerId ?? null;
+}
+
 export interface SubscriptionSyncData {
   isPro: boolean;
   stripeSubscriptionId: string | null;

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/auth", () => ({
   auth: vi.fn(),
@@ -13,12 +13,17 @@ vi.mock("@/lib/db/items", () => ({
   toggleItemPin: vi.fn(),
 }));
 
+vi.mock("@/lib/db/billing", () => ({
+  countItemsForUser: vi.fn(),
+}));
+
 vi.mock("@/lib/r2", () => ({
   deleteFromR2: vi.fn(),
   keyFromFileUrl: vi.fn((fileUrl: string) => new URL(fileUrl).pathname.replace(/^\/+/, "")),
 }));
 
 import { auth } from "@/auth";
+import { countItemsForUser as countItemsForUserQuery } from "@/lib/db/billing";
 import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
@@ -38,6 +43,7 @@ const mockedGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
 const mockedToggleItemFavoriteQuery = vi.mocked(toggleItemFavoriteQuery);
 const mockedToggleItemPinQuery = vi.mocked(toggleItemPinQuery);
 const mockedDeleteFromR2 = vi.mocked(deleteFromR2);
+const mockedCountItemsForUserQuery = vi.mocked(countItemsForUserQuery);
 
 const validInput = {
   title: "Updated title",
@@ -50,6 +56,10 @@ const validInput = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+afterEach(() => {
+  delete process.env.BILLING_LIMITS_ENABLED;
 });
 
 describe("updateItem", () => {
@@ -205,6 +215,36 @@ describe("createItem", () => {
 
     expect(result).toEqual({ success: false, error: "Title is required" });
     expect(mockedCreateItemQuery).not.toHaveBeenCalled();
+  });
+
+  it("blocks a free user at the item limit when enforcement is enabled", async () => {
+    process.env.BILLING_LIMITS_ENABLED = "true";
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: false } });
+    mockedCountItemsForUserQuery.mockResolvedValue(50);
+
+    const result = await createItem(validCreateInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "Free plan is limited to 50 items. Upgrade to Pro for unlimited items.",
+    });
+    expect(mockedCreateItemQuery).not.toHaveBeenCalled();
+  });
+
+  it("does not enforce the item limit for a Pro user", async () => {
+    process.env.BILLING_LIMITS_ENABLED = "true";
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedGetItemTypeBySlug.mockResolvedValue({ id: "type-1", name: "Snippet" });
+    // @ts-expect-error - minimal mock, only the fields the test asserts on
+    mockedCreateItemQuery.mockResolvedValue({ id: "item-1" });
+
+    const result = await createItem(validCreateInput);
+
+    expect(result.success).toBe(true);
+    expect(mockedCountItemsForUserQuery).not.toHaveBeenCalled();
   });
 
   it("rejects a link item with no URL", async () => {

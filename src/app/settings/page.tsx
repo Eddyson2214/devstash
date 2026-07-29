@@ -6,10 +6,12 @@ import { ArrowLeft } from "lucide-react";
 import { auth } from "@/auth";
 import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { DeleteAccountDialog } from "@/components/profile/DeleteAccountDialog";
+import { BillingCard } from "@/components/settings/BillingCard";
 import { EditorPreferencesForm } from "@/components/settings/EditorPreferencesForm";
 import { EditorPreferencesProvider } from "@/components/settings/EditorPreferencesProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getBillingInfo } from "@/lib/db/billing";
 import { getProfileUser } from "@/lib/db/profile";
 import { getEditorPreferences } from "@/lib/db/settings";
 
@@ -25,12 +27,13 @@ export default async function SettingsPage() {
     redirect("/sign-in");
   }
 
-  const [user, editorPreferences] = await Promise.all([
+  const [user, editorPreferences, billingInfo] = await Promise.all([
     getProfileUser(session.user.id),
     getEditorPreferences(session.user.id),
+    getBillingInfo(session.user.id),
   ]);
 
-  if (!user) {
+  if (!user || !billingInfo) {
     redirect("/sign-in");
   }
 
@@ -68,6 +71,16 @@ export default async function SettingsPage() {
               </p>
               <DeleteAccountDialog />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Billing</CardTitle>
+          </CardHeader>
+          <Separator />
+          <CardContent>
+            <BillingCard billingInfo={billingInfo} />
           </CardContent>
         </Card>
 

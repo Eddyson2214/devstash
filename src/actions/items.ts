@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { countItemsForUser } from "@/lib/db/billing";
 import {
   createItem as createItemQuery,
   deleteItem as deleteItemQuery,
@@ -12,6 +13,7 @@ import {
   updateItem as updateItemQuery,
   type ItemDetail,
 } from "@/lib/db/items";
+import { FREE_ITEM_LIMIT, hasReachedItemLimit, isLimitEnforcementEnabled } from "@/lib/limits";
 import { deleteFromR2, keyFromFileUrl } from "@/lib/r2";
 
 const CREATABLE_ITEM_TYPES = [
@@ -57,6 +59,16 @@ export async function createItem(
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, error: "Not authenticated" };
+  }
+
+  if (isLimitEnforcementEnabled() && !session.user.isPro) {
+    const itemCount = await countItemsForUser(session.user.id);
+    if (hasReachedItemLimit(itemCount, session.user.isPro)) {
+      return {
+        success: false,
+        error: `Free plan is limited to ${FREE_ITEM_LIMIT} items. Upgrade to Pro for unlimited items.`,
+      };
+    }
   }
 
   const parsed = createItemSchema.safeParse(data);
