@@ -53,7 +53,7 @@ export function Topbar({ defaultItemType, isPro }: TopbarProps) {
           <span className="sr-only">Favorites</span>
         </Button>
         <NewCollectionDialog />
-        <NewItemDialog defaultType={defaultItemType} />
+        <NewItemDialog defaultType={defaultItemType} isPro={isPro} />
       </div>
     </header>
   );

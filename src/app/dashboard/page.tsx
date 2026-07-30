@@ -54,7 +54,7 @@ export default async function DashboardPage() {
 
   return (
     <EditorPreferencesProvider initialPreferences={editorPreferences}>
-      <ItemDrawerProvider>
+      <ItemDrawerProvider isPro={session.user.isPro}>
         <CommandPaletteProvider>
           <SidebarProvider className="min-h-screen">
             <AppSidebar

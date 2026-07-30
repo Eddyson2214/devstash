@@ -9,6 +9,7 @@ import { createItem, type CreatableItemType } from "@/actions/items";
 import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { FileUpload, type UploadedFile } from "@/components/items/FileUpload";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
+import { SuggestTagsButton } from "@/components/items/SuggestTagsButton";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCollections } from "@/hooks/use-collections";
+import { appendTag } from "@/lib/tags";
 import { TYPE_ICONS } from "@/lib/type-icons";
 
 interface ItemTypeOption {
@@ -84,11 +86,13 @@ function emptyForm(defaultType: CreatableItemType): FormState {
 interface NewItemDialogProps {
   defaultType?: CreatableItemType;
   triggerLabel?: string;
+  isPro?: boolean;
 }
 
 export function NewItemDialog({
   defaultType = "snippet",
   triggerLabel = "New Item",
+  isPro = false,
 }: NewItemDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -261,6 +265,16 @@ export function NewItemDialog({
               value={form.tagsInput}
               onChange={(event) => setForm({ ...form, tagsInput: event.target.value })}
             />
+            {isPro && (
+              <SuggestTagsButton
+                title={form.title}
+                content={form.content}
+                tagsInput={form.tagsInput}
+                onAcceptTag={(tag) =>
+                  setForm((current) => ({ ...current, tagsInput: appendTag(current.tagsInput, tag) }))
+                }
+              />
+            )}
           </div>
         </div>
 

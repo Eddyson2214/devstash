@@ -1,12 +1,31 @@
-# Current Feature
+# Current Feature: AI Auto-Tagging
 
 ## Status
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- Create OpenAI client utility with an `AI_MODEL` constant (skip if a prior AI feature already created it)
+- Use the **Responses API** (`client.responses.create`), NOT Chat Completions — gpt-5-nano returns empty content on Chat Completions
+- Create a `generateAutoTags` Server Action with auth check, Pro gating, Zod validation, and rate limiting
+- Add an AI rate limit config (20 requests/hour per user) to the existing `src/lib/rate-limit.ts` utility (skip if already added)
+- Add a "Suggest Tags" button (Sparkles icon, ghost variant) near the tags input in both the New Item dialog and the item drawer's edit mode
+- Display suggested tags as badges with per-tag accept (check) / reject (X) controls
+- Accepted tags get appended to the item's tag list; tags are freeform, not limited to existing DB tags
+- Truncate item content to 2000 chars before sending to the API
+- Hide the Suggest Tags button entirely for free users (UI-level gating, in addition to server-side gating)
+- Surface errors (Pro gating, rate limit, AI service failure) via toast
+- Follow existing codebase patterns (Server Actions, Zod, rate-limit, toast conventions)
+- Add unit tests for the new server action
 
 ## Notes
-<!-- Any extra notes -->
+- `OPENAI_API_KEY` is already set in `.env`
+- **Critical SDK gotcha**: `openai` v6+ has two APIs; gpt-5-nano only works with the Responses API. Use `instructions` (system) + `input` (user), `text: { format: { type: 'json_object' } }`, and read the result from `response.output_text` — not `client.chat.completions.create()` / `completion.choices[0].message.content`.
+- Don't use `max_tokens` (unsupported by gpt-5-nano). Don't use `zodResponseFormat` structured output — it burns excessive tokens and hits length limits with this model; use plain `json_object` format and parse manually.
+- Model may return `{"tags": [...]}` or a bare `[...]` array — handle both shapes.
+- Always lowercase-normalize tags after receiving them from the model.
+- `isPro` is available server-side via the session but is not currently passed into the create/edit UI components — for UI-level button visibility, thread it in as a prop or fetch it client-side; server-side gating in the action is the actual enforcement boundary.
+- Background architectural context lives in `docs/ai-integration-plan.md`.
+- This is likely the first AI feature implemented, so it also establishes the OpenAI client/server-action/rate-limit foundation other AI features (summaries, explain-code, prompt optimizer) will reuse.
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

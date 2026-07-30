@@ -67,7 +67,7 @@ export default async function ItemTypePage({
 
   return (
     <EditorPreferencesProvider initialPreferences={editorPreferences}>
-      <ItemDrawerProvider>
+      <ItemDrawerProvider isPro={session.user.isPro}>
         <CommandPaletteProvider>
           <SidebarProvider className="min-h-screen">
             <AppSidebar
@@ -115,6 +115,7 @@ export default async function ItemTypePage({
                         <NewItemDialog
                           defaultType={defaultItemType}
                           triggerLabel={`New ${itemType.name}`}
+                          isPro={session.user.isPro}
                         />
                       )}
                     </div>
@@ -125,6 +126,7 @@ export default async function ItemTypePage({
                         <NewItemDialog
                           defaultType={defaultItemType}
                           triggerLabel={`New ${itemType.name}`}
+                          isPro={session.user.isPro}
                         />
                       );
 

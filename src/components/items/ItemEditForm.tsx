@@ -2,10 +2,12 @@
 
 import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
+import { SuggestTagsButton } from "@/components/items/SuggestTagsButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { CollectionOption } from "@/lib/db/collections";
+import { appendTag } from "@/lib/tags";
 
 export interface EditFormState {
   id: string;
@@ -26,6 +28,7 @@ interface ItemEditFormProps {
   showsUrl: boolean;
   collections: CollectionOption[];
   collectionsLoading: boolean;
+  isPro?: boolean;
 }
 
 export function ItemEditForm({
@@ -36,6 +39,7 @@ export function ItemEditForm({
   showsUrl,
   collections,
   collectionsLoading,
+  isPro = false,
 }: ItemEditFormProps) {
   return (
     <>
@@ -95,6 +99,14 @@ export function ItemEditForm({
           value={form.tagsInput}
           onChange={(event) => onChange({ ...form, tagsInput: event.target.value })}
         />
+        {isPro && (
+          <SuggestTagsButton
+            title={form.title}
+            content={form.content}
+            tagsInput={form.tagsInput}
+            onAcceptTag={(tag) => onChange({ ...form, tagsInput: appendTag(form.tagsInput, tag) })}
+          />
+        )}
       </div>
     </>
   );

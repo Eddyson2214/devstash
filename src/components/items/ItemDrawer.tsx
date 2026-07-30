@@ -31,9 +31,10 @@ interface ItemDrawerProps {
   itemId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isPro?: boolean;
 }
 
-export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
+export function ItemDrawer({ itemId, open, onOpenChange, isPro = false }: ItemDrawerProps) {
   const router = useRouter();
   const { item, loading, setItem } = useItemDrawerData(itemId, open);
   const [form, setForm] = useState<EditFormState | null>(null);
@@ -215,6 +216,7 @@ export function ItemDrawer({ itemId, open, onOpenChange }: ItemDrawerProps) {
                   showsUrl={showsUrl}
                   collections={collections}
                   collectionsLoading={collectionsLoading}
+                  isPro={isPro}
                 />
               ) : (
                 <ItemViewContent item={item} showsFile={showsFile} showsLanguage={showsLanguage} />

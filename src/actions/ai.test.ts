@@ -1,0 +1,144 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/auth", () => ({
+  auth: vi.fn(),
+}));
+
+vi.mock("@/lib/openai", () => ({
+  openai: {
+    responses: { create: vi.fn() },
+  },
+  AI_MODEL: "gpt-5-nano",
+}));
+
+vi.mock("@/lib/rate-limit", () => ({
+  aiSuggestTagsRatelimit: {},
+  checkRateLimit: vi.fn(),
+  RATE_LIMIT_MESSAGE: "Too many attempts. Please try again later.",
+}));
+
+import { auth } from "@/auth";
+import { openai } from "@/lib/openai";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { generateAutoTags } from "@/actions/ai";
+
+const mockedAuth = vi.mocked(auth);
+const mockedResponsesCreate = vi.mocked(openai.responses.create);
+const mockedCheckRateLimit = vi.mocked(checkRateLimit);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  mockedCheckRateLimit.mockResolvedValue({ success: true, reset: 0 });
+});
+
+describe("generateAutoTags", () => {
+  it("rejects when there is no session", async () => {
+    mockedAuth.mockResolvedValue(null);
+
+    const result = await generateAutoTags({ title: "My Snippet", content: "console.log(1)" });
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockedResponsesCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects free users", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: false } });
+
+    const result = await generateAutoTags({ title: "My Snippet", content: "console.log(1)" });
+
+    expect(result).toEqual({ success: false, error: "AI tag suggestions are a Pro feature." });
+    expect(mockedResponsesCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns a rate-limit error when the limiter rejects", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    mockedCheckRateLimit.mockResolvedValue({ success: false, reset: Date.now() });
+
+    const result = await generateAutoTags({ title: "My Snippet", content: "console.log(1)" });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Too many attempts. Please try again later.",
+    });
+    expect(mockedResponsesCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects an empty title", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+
+    const result = await generateAutoTags({ title: "  ", content: "console.log(1)" });
+
+    expect(result).toEqual({ success: false, error: "Title is required" });
+    expect(mockedResponsesCreate).not.toHaveBeenCalled();
+  });
+
+  it("parses a {tags: [...]} response and lowercases/dedupes tags", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedResponsesCreate.mockResolvedValue({
+      output_text: JSON.stringify({ tags: ["React", "react", "Hooks"] }),
+    });
+
+    const result = await generateAutoTags({ title: "My Hook", content: "useEffect(...)" });
+
+    expect(result).toEqual({ success: true, data: ["react", "hooks"] });
+  });
+
+  it("parses a bare array response", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedResponsesCreate.mockResolvedValue({
+      output_text: JSON.stringify(["docker", "compose"]),
+    });
+
+    const result = await generateAutoTags({ title: "My Dockerfile", content: "FROM node" });
+
+    expect(result).toEqual({ success: true, data: ["docker", "compose"] });
+  });
+
+  it("truncates content to 2000 chars before calling the API", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedResponsesCreate.mockResolvedValue({ output_text: JSON.stringify({ tags: ["long"] }) });
+
+    const longContent = "a".repeat(3000);
+    await generateAutoTags({ title: "Big file", content: longContent });
+
+    const call = mockedResponsesCreate.mock.calls[0]![0] as { input: string };
+    expect(call.input).toContain("a".repeat(2000));
+    expect(call.input).not.toContain("a".repeat(2001));
+  });
+
+  it("returns a friendly error when parsing fails or yields no tags", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedResponsesCreate.mockResolvedValue({ output_text: "not json" });
+
+    const result = await generateAutoTags({ title: "My Snippet", content: "console.log(1)" });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Couldn't generate tag suggestions. Please try again.",
+    });
+  });
+
+  it("returns a friendly error when the API call throws", async () => {
+    // @ts-expect-error - minimal mock, only the fields the action reads
+    mockedAuth.mockResolvedValue({ user: { id: "user-1", isPro: true } });
+    mockedResponsesCreate.mockRejectedValue(new Error("OpenAI is down"));
+
+    const result = await generateAutoTags({ title: "My Snippet", content: "console.log(1)" });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Couldn't generate tag suggestions. Please try again.",
+    });
+  });
+});
