@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { AI_MODEL, openai } from "@/lib/openai";
 import {
   aiExplainCodeRatelimit,
+  aiOptimizePromptRatelimit,
   aiSuggestSummaryRatelimit,
   aiSuggestTagsRatelimit,
   checkRateLimit,
@@ -255,5 +256,83 @@ export async function explainCode(
   } catch (error) {
     console.error("explainCode failed:", error);
     return { success: false, error: "Couldn't generate an explanation. Please try again." };
+  }
+}
+
+const OPTIMIZE_PROMPT_SYSTEM_INSTRUCTIONS =
+  'You are a prompt engineering assistant for DevStash, a developer knowledge-management tool. Given the title and current text of a saved AI prompt, review it and rewrite it to be more effective — clearer instructions, better structure, more precise wording — while preserving the original intent. If the prompt is already strong, return it with only minor polish rather than rewriting it wholesale. Respond with ONLY a JSON object in the exact shape {"optimizedPrompt": "..."} and nothing else.';
+
+const optimizePromptSchema = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  content: z.string().trim().min(1, "Content is required"),
+});
+
+export type OptimizePromptInput = z.infer<typeof optimizePromptSchema>;
+
+function parseOptimizedPrompt(raw: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  const optimized =
+    parsed &&
+    typeof parsed === "object" &&
+    typeof (parsed as { optimizedPrompt?: unknown }).optimizedPrompt === "string"
+      ? (parsed as { optimizedPrompt: string }).optimizedPrompt
+      : null;
+
+  const trimmed = optimized?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export async function optimizePrompt(
+  input: OptimizePromptInput
+): Promise<{ success: true; data: string } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  if (!session.user.isPro) {
+    return { success: false, error: "AI prompt optimization is a Pro feature." };
+  }
+
+  const { success: withinLimit } = await checkRateLimit(
+    aiOptimizePromptRatelimit,
+    session.user.id
+  );
+  if (!withinLimit) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const parsed = optimizePromptSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const truncatedContent = parsed.data.content.slice(0, MAX_CONTENT_LENGTH);
+
+  try {
+    const response = await openai.responses.create({
+      model: AI_MODEL,
+      instructions: OPTIMIZE_PROMPT_SYSTEM_INSTRUCTIONS,
+      input: `Respond in JSON.\n\nTitle: ${parsed.data.title}\n\nCurrent prompt:\n${truncatedContent}`,
+      text: {
+        format: { type: "json_object" },
+      },
+    });
+
+    const optimized = parseOptimizedPrompt(response.output_text);
+    if (!optimized) {
+      return { success: false, error: "Couldn't optimize this prompt. Please try again." };
+    }
+
+    return { success: true, data: optimized };
+  } catch (error) {
+    console.error("optimizePrompt failed:", error);
+    return { success: false, error: "Couldn't optimize this prompt. Please try again." };
   }
 }

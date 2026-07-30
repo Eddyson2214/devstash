@@ -52,6 +52,42 @@ const MONACO_LANGUAGES = new Set([
   "plaintext",
 ]);
 
+export interface LanguageSelectOption {
+  value: string;
+  label: string;
+}
+
+export const LANGUAGE_SELECT_OPTIONS: LanguageSelectOption[] = [
+  { value: "", label: "Plain Text" },
+  { value: "JavaScript", label: "JavaScript" },
+  { value: "TypeScript", label: "TypeScript" },
+  { value: "Python", label: "Python" },
+  { value: "Ruby", label: "Ruby" },
+  { value: "Go", label: "Go" },
+  { value: "Rust", label: "Rust" },
+  { value: "Java", label: "Java" },
+  { value: "C", label: "C" },
+  { value: "C++", label: "C++" },
+  { value: "C#", label: "C#" },
+  { value: "PHP", label: "PHP" },
+  { value: "HTML", label: "HTML" },
+  { value: "CSS", label: "CSS" },
+  { value: "SCSS", label: "SCSS" },
+  { value: "Less", label: "Less" },
+  { value: "JSON", label: "JSON" },
+  { value: "YAML", label: "YAML" },
+  { value: "XML", label: "XML" },
+  { value: "SQL", label: "SQL" },
+  { value: "Bash", label: "Bash" },
+  { value: "PowerShell", label: "PowerShell" },
+  { value: "Kotlin", label: "Kotlin" },
+  { value: "Swift", label: "Swift" },
+  { value: "Dart", label: "Dart" },
+  { value: "GraphQL", label: "GraphQL" },
+  { value: "Markdown", label: "Markdown" },
+  { value: "Dockerfile", label: "Dockerfile" },
+];
+
 export function toMonacoLanguage(language?: string | null): string {
   if (!language) return "plaintext";
 

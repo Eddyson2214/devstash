@@ -1,12 +1,21 @@
-# Current Feature
+# Current Feature: AI Prompt Optimizer
 
 ## Status
+In Progress
 
 ## Goals
-<!-- Goals and requirements -->
+- Add an "Optimize" button to `MarkdownEditor`'s header, in edit mode only, visible only for `prompt`-type items (not `note`, which shares the same editor).
+- Clicking it sends the current prompt content to a new AI Server Action that reviews the prompt and produces a refined/optimized version (or returns it largely unchanged if it's already good).
+- Show the optimized version to the user and let them choose to use it or keep the original — don't silently overwrite like AI Description Summary does. Accepting replaces the editable textarea content in place (no DB write yet — persistence still happens via the existing Save button); rejecting/discarding leaves the original untouched.
+- Follows the same Pro-gating/rate-limiting pattern as the other 3 AI features (`generateAutoTags`, `generateAiSummary`, `explainCode`): hard Pro-gate (no soft flag), its own rate limiter entry, 20/hour per user.
 
 ## Notes
-<!-- Any extra notes -->
+- Reference implementation for the button/loading/tab pattern: `CodeEditor`'s `explain` prop (`src/components/items/CodeEditor.tsx`) — Sparkles icon + `Loader2` spinner while generating, disabled Crown+Tooltip ("AI features require Pro subscription") for free users. But unlike Explain (read-only, wired only into the drawer's view mode via `ItemViewContent`), Optimize must live in edit mode since it needs to modify content — confirmed with user: edit mode only (`NewItemDialog` + `ItemEditForm`'s drawer edit mode), not the read-only view.
+- `MarkdownEditor` (`src/components/items/MarkdownEditor.tsx`) currently has no Pro-awareness or AI wiring — needs a new optional prop (e.g. `optimize?: { title, isPro }`) mirroring `CodeEditor`'s `explain` prop shape, plus an `onChange` requirement since accepting needs to call it with the optimized text.
+- `MarkdownEditor` is shared by Prompt and Note (both satisfy `showsContent && !showsLanguage`) — gate the `optimize` prop to Prompt only at the call site (`ItemContentFields.tsx`), same way `showsLanguage` already segregates Snippet/Command from Prompt/Note.
+- Need an accept/reject UI once optimization is generated — likely a third tab or inline banner ("Use optimized version" / "Keep original"), distinct from `CodeEditor`'s Code/Explain tabs since those are just two read-only views, not a pending change to accept into the actual value.
+- New Server Action: `optimizePrompt` in `src/actions/ai.ts`, following `explainCode`'s exact shape (auth → hard Pro-gate → rate limit → Zod validation → 2000-char truncation → `openai.responses.create` via the Responses API → parse a `{"optimizedPrompt": "..."}` JSON shape). New `aiOptimizePromptRatelimit` entry in `src/lib/rate-limit.ts`.
+- `ItemContentFields.tsx` is the shared component bundling Content+Language for both `NewItemDialog` and `ItemEditForm` — the `optimize` prop needs a `title` (for the AI prompt context) and `isPro`, both of which the two call sites already have available (same as how `explain`/summary features already thread `isPro`/`title` through).
 
 ## History
 <!-- Keep this updated. Earliest to latest -->

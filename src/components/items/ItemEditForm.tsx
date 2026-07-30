@@ -27,6 +27,7 @@ interface ItemEditFormProps {
   showsContent: boolean;
   showsLanguage: boolean;
   showsUrl: boolean;
+  isPromptType?: boolean;
   fileName?: string | null;
   collections: CollectionOption[];
   collectionsLoading: boolean;
@@ -39,6 +40,7 @@ export function ItemEditForm({
   showsContent,
   showsLanguage,
   showsUrl,
+  isPromptType = false,
   fileName,
   collections,
   collectionsLoading,
@@ -81,6 +83,9 @@ export function ItemEditForm({
         language={form.language}
         onLanguageChange={(next) => onChange({ ...form, language: next })}
         languageInputId="item-language"
+        isPromptType={isPromptType}
+        title={form.title}
+        isPro={isPro}
       />
 
       {showsUrl && (

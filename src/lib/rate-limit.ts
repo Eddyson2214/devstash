@@ -33,6 +33,7 @@ export const resendVerificationRatelimit = createLimiter("resend-verification", 
 export const aiSuggestTagsRatelimit = createLimiter("ai-suggest-tags", 20, "1 h");
 export const aiSuggestSummaryRatelimit = createLimiter("ai-suggest-summary", 20, "1 h");
 export const aiExplainCodeRatelimit = createLimiter("ai-explain-code", 20, "1 h");
+export const aiOptimizePromptRatelimit = createLimiter("ai-optimize-prompt", 20, "1 h");
 
 interface RateLimitResult {
   success: boolean;

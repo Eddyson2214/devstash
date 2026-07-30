@@ -2,8 +2,15 @@
 
 import { CodeEditor } from "@/components/items/CodeEditor";
 import { MarkdownEditor } from "@/components/items/MarkdownEditor";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LANGUAGE_SELECT_OPTIONS } from "@/lib/monaco-language";
 
 interface ItemContentFieldsProps {
   showsContent: boolean;
@@ -13,6 +20,9 @@ interface ItemContentFieldsProps {
   language: string;
   onLanguageChange: (value: string) => void;
   languageInputId: string;
+  isPromptType?: boolean;
+  title?: string;
+  isPro?: boolean;
 }
 
 export function ItemContentFields({
@@ -23,33 +33,51 @@ export function ItemContentFields({
   language,
   onLanguageChange,
   languageInputId,
+  isPromptType = false,
+  title = "",
+  isPro = false,
 }: ItemContentFieldsProps) {
+  const matchedLanguageOption = LANGUAGE_SELECT_OPTIONS.find(
+    (option) => option.value.toLowerCase() === language.toLowerCase()
+  );
+
   return (
     <>
-      {showsContent && (
-        <div className="flex flex-col gap-1.5">
-          {showsLanguage ? (
-            <>
-              <Label>Content</Label>
-              <CodeEditor value={content} onChange={onContentChange} language={language || null} />
-            </>
-          ) : (
-            <>
-              <Label>Content</Label>
-              <MarkdownEditor value={content} onChange={onContentChange} />
-            </>
-          )}
-        </div>
-      )}
-
       {showsLanguage && (
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={languageInputId}>Language</Label>
-          <Input
-            id={languageInputId}
-            value={language}
-            onChange={(event) => onLanguageChange(event.target.value)}
-          />
+          <Select
+            value={matchedLanguageOption?.value ?? language}
+            onValueChange={(value) => onLanguageChange(value ?? "")}
+          >
+            <SelectTrigger id={languageInputId} className="w-full">
+              <SelectValue>
+                {() => matchedLanguageOption?.label || language || "Plain Text"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {LANGUAGE_SELECT_OPTIONS.map((option) => (
+                <SelectItem key={option.value || "plaintext"} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {showsContent && (
+        <div className="flex flex-col gap-1.5">
+          <Label>Content</Label>
+          {showsLanguage ? (
+            <CodeEditor value={content} onChange={onContentChange} language={language || null} />
+          ) : (
+            <MarkdownEditor
+              value={content}
+              onChange={onContentChange}
+              optimize={isPromptType ? { title, isPro } : undefined}
+            />
+          )}
         </div>
       )}
     </>

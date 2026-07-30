@@ -257,6 +257,9 @@ export function NewItemDialog({
             language={form.language}
             onLanguageChange={(next) => setForm({ ...form, language: next })}
             languageInputId="new-item-language"
+            isPromptType={form.type === "prompt"}
+            title={form.title}
+            isPro={isPro}
           />
 
           <CollectionCheckboxList
