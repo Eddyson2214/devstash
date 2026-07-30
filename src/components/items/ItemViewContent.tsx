@@ -10,9 +10,10 @@ interface ItemViewContentProps {
   item: FetchedItemDetail;
   showsFile: boolean;
   showsLanguage: boolean;
+  isPro: boolean;
 }
 
-export function ItemViewContent({ item, showsFile, showsLanguage }: ItemViewContentProps) {
+export function ItemViewContent({ item, showsFile, showsLanguage, isPro }: ItemViewContentProps) {
   return (
     <>
       {item.description && (
@@ -73,7 +74,12 @@ export function ItemViewContent({ item, showsFile, showsLanguage }: ItemViewCont
               Content
             </h4>
             {showsLanguage ? (
-              <CodeEditor value={item.content} language={item.language} readOnly />
+              <CodeEditor
+                value={item.content}
+                language={item.language}
+                readOnly
+                explain={{ title: item.title, isPro }}
+              />
             ) : (
               <MarkdownEditor value={item.content} readOnly />
             )}

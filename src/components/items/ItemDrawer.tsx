@@ -220,7 +220,12 @@ export function ItemDrawer({ itemId, open, onOpenChange, isPro = false }: ItemDr
                   isPro={isPro}
                 />
               ) : (
-                <ItemViewContent item={item} showsFile={showsFile} showsLanguage={showsLanguage} />
+                <ItemViewContent
+                  item={item}
+                  showsFile={showsFile}
+                  showsLanguage={showsLanguage}
+                  isPro={isPro}
+                />
               )}
 
               {!editing && item.collections.length > 0 && (

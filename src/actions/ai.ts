@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { AI_MODEL, openai } from "@/lib/openai";
 import {
+  aiExplainCodeRatelimit,
   aiSuggestSummaryRatelimit,
   aiSuggestTagsRatelimit,
   checkRateLimit,
@@ -171,5 +172,88 @@ export async function generateAiSummary(
   } catch (error) {
     console.error("generateAiSummary failed:", error);
     return { success: false, error: "Couldn't generate a summary. Please try again." };
+  }
+}
+
+const EXPLAIN_SYSTEM_INSTRUCTIONS =
+  'You are a code-explanation assistant for DevStash, a developer knowledge-management tool. Given a title, language, and the content of a code snippet or terminal command, write a concise explanation of about 200 to 300 words covering what it does and any key concepts, formatted as markdown (use inline code spans, and bullet points where helpful). Respond with ONLY a JSON object in the exact shape {"explanation": "..."} and nothing else.';
+
+const explainCodeSchema = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  content: z.string().trim().min(1, "Content is required"),
+  language: z.string().trim().nullable().optional().default(""),
+});
+
+export type ExplainCodeInput = z.infer<typeof explainCodeSchema>;
+
+function parseExplanation(raw: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+
+  const explanation =
+    parsed &&
+    typeof parsed === "object" &&
+    typeof (parsed as { explanation?: unknown }).explanation === "string"
+      ? (parsed as { explanation: string }).explanation
+      : null;
+
+  const trimmed = explanation?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export async function explainCode(
+  input: ExplainCodeInput
+): Promise<{ success: true; data: string } | { success: false; error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  if (!session.user.isPro) {
+    return { success: false, error: "AI code explanations are a Pro feature." };
+  }
+
+  const { success: withinLimit } = await checkRateLimit(aiExplainCodeRatelimit, session.user.id);
+  if (!withinLimit) {
+    return { success: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const parsed = explainCodeSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const truncatedContent = parsed.data.content.slice(0, MAX_CONTENT_LENGTH);
+  const details = [
+    `Title: ${parsed.data.title}`,
+    parsed.data.language && `Language: ${parsed.data.language}`,
+    `Content:\n${truncatedContent}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
+  try {
+    const response = await openai.responses.create({
+      model: AI_MODEL,
+      instructions: EXPLAIN_SYSTEM_INSTRUCTIONS,
+      input: `Respond in JSON.\n\n${details}`,
+      text: {
+        format: { type: "json_object" },
+      },
+    });
+
+    const explanation = parseExplanation(response.output_text);
+    if (!explanation) {
+      return { success: false, error: "Couldn't generate an explanation. Please try again." };
+    }
+
+    return { success: true, data: explanation };
+  } catch (error) {
+    console.error("explainCode failed:", error);
+    return { success: false, error: "Couldn't generate an explanation. Please try again." };
   }
 }
