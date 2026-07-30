@@ -214,6 +214,7 @@ export function ItemDrawer({ itemId, open, onOpenChange, isPro = false }: ItemDr
                   showsContent={showsContent}
                   showsLanguage={showsLanguage}
                   showsUrl={showsUrl}
+                  fileName={item.fileName}
                   collections={collections}
                   collectionsLoading={collectionsLoading}
                   isPro={isPro}

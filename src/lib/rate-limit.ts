@@ -31,6 +31,7 @@ export const forgotPasswordRatelimit = createLimiter("forgot-password", 3, "1 h"
 export const resetPasswordRatelimit = createLimiter("reset-password", 5, "15 m");
 export const resendVerificationRatelimit = createLimiter("resend-verification", 3, "15 m");
 export const aiSuggestTagsRatelimit = createLimiter("ai-suggest-tags", 20, "1 h");
+export const aiSuggestSummaryRatelimit = createLimiter("ai-suggest-summary", 20, "1 h");
 
 interface RateLimitResult {
   success: boolean;

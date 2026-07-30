@@ -9,6 +9,7 @@ import { createItem, type CreatableItemType } from "@/actions/items";
 import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { FileUpload, type UploadedFile } from "@/components/items/FileUpload";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
+import { SuggestDescriptionButton } from "@/components/items/SuggestDescriptionButton";
 import { SuggestTagsButton } from "@/components/items/SuggestTagsButton";
 import { Button } from "@/components/ui/button";
 import {
@@ -214,6 +215,15 @@ export function NewItemDialog({
               value={form.description}
               onChange={(event) => setForm({ ...form, description: event.target.value })}
             />
+            {isPro && (
+              <SuggestDescriptionButton
+                title={form.title}
+                content={form.content}
+                url={form.url}
+                fileName={form.file?.fileName}
+                onSuggest={(description) => setForm((current) => ({ ...current, description }))}
+              />
+            )}
           </div>
 
           {showsUrl && (

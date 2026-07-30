@@ -2,6 +2,7 @@
 
 import { CollectionCheckboxList } from "@/components/items/CollectionCheckboxList";
 import { ItemContentFields } from "@/components/items/ItemContentFields";
+import { SuggestDescriptionButton } from "@/components/items/SuggestDescriptionButton";
 import { SuggestTagsButton } from "@/components/items/SuggestTagsButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +27,7 @@ interface ItemEditFormProps {
   showsContent: boolean;
   showsLanguage: boolean;
   showsUrl: boolean;
+  fileName?: string | null;
   collections: CollectionOption[];
   collectionsLoading: boolean;
   isPro?: boolean;
@@ -37,6 +39,7 @@ export function ItemEditForm({
   showsContent,
   showsLanguage,
   showsUrl,
+  fileName,
   collections,
   collectionsLoading,
   isPro = false,
@@ -59,6 +62,15 @@ export function ItemEditForm({
           value={form.description}
           onChange={(event) => onChange({ ...form, description: event.target.value })}
         />
+        {isPro && (
+          <SuggestDescriptionButton
+            title={form.title}
+            content={form.content}
+            url={form.url}
+            fileName={fileName ?? undefined}
+            onSuggest={(description) => onChange({ ...form, description })}
+          />
+        )}
       </div>
 
       <ItemContentFields
